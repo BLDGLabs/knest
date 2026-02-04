@@ -1,8 +1,8 @@
 # Mission Control - Kanban Task Board
 
-A modern, dark-themed Kanban task board built with React, featuring drag-and-drop functionality, Epic-based filtering, activity tracking, and a sleek UI inspired by mission control interfaces.
+A modern, dark-themed Kanban task board built with React and AWS DynamoDB, featuring drag-and-drop functionality, Epic-based filtering, activity tracking, and a sleek UI inspired by mission control interfaces.
 
-![Mission Control Kanban Board](https://img.shields.io/badge/React-v18-blue) ![Vite](https://img.shields.io/badge/Vite-v6-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3-38BDF8)
+![Mission Control Kanban Board](https://img.shields.io/badge/React-v18-blue) ![Vite](https://img.shields.io/badge/Vite-v6-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3-38BDF8) ![DynamoDB](https://img.shields.io/badge/DynamoDB-AWS-orange)
 
 ## ✨ Features
 
@@ -12,154 +12,165 @@ A modern, dark-themed Kanban task board built with React, featuring drag-and-dro
 - **🎨 Assignee Filtering** - Filter board by assignee to see "My Tasks" or team member tasks
 - **🔗 Task Dependencies** - Create dependency chains with visual blocked indicators
 - **🔒 Dependency Blocking** - Tasks show "blocked" status when dependencies are incomplete
-- **🎨 Dark Theme UI** - Sleek, modern interface with subtle borders and dark backgrounds
-- **📊 4 Kanban Columns** - Recurring, Backlog, In Progress, Review
+- **☁️ DynamoDB Backend** - Cloud-persisted data with AWS DynamoDB single-table design
 - **🔄 Drag & Drop** - Intuitive task management with @dnd-kit
 - **🏷️ Color-Coded Tags** - Organize tasks with bug, feature, improvement, urgent, and documentation labels
-- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate (updates based on filters)
-- **📋 Activity Feed** - Real-time sidebar showing recent actions (created, moved, completed, deleted)
-- **💾 Local Storage** - All data persists in browser, no backend needed
+- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate
+- **📋 Activity Feed** - Real-time sidebar showing recent actions
 - **✏️ Full CRUD** - Add, edit, delete, and complete tasks and epics with ease
-- **⏱️ Smart Timestamps** - Relative time display (e.g., "2h ago")
 - **📱 Collapsible Sidebar** - Epic sidebar can be collapsed to maximize board space
-
-## 👥 Assignee Feature
-
-### Assigning Tasks
-
-Tasks can be assigned to team members to track ownership and responsibility.
-
-**Available assignees:**
-- **Miti** - Purple badge with "M" initial
-- **Jason** - Blue badge with "J" initial
-- **Unassigned** - No assignee set
-
-### Assignee Functionality
-
-- **Assign in TaskModal** - Select assignee when creating or editing tasks using button group
-- **Visual Badges** - Task cards display assignee initials in colored circles (M for Miti, J for Jason)
-- **Filter by Assignee** - Click assignee in sidebar to show only their tasks
-  - "Everyone" - Shows all tasks
-  - "Miti" - Shows only Miti's tasks
-  - "Jason" - Shows only Jason's tasks
-  - "Unassigned" - Shows tasks with no assignee
-- **Task Counts** - Each assignee shows real-time task count
-- **Combined Filtering** - Assignee and Epic filters work together (e.g., "Miti's tasks in Q1 Platform Improvements Epic")
-
-### Important Context
-
-**If tasks are assigned to Miti, she should work on them.** This sets up future functionality where Miti can proactively identify and work on her assigned tasks.
-
-## 🔗 Task Dependencies Feature
-
-### What are Task Dependencies?
-
-Task dependencies create relationships between tasks, ensuring work happens in the correct order. For example:
-- **Task A**: "Jason sets up S3 bucket" (assigned to Jason)
-- **Task B**: "Miti builds S3 integration" (assigned to Miti, **depends on Task A**)
-
-Task B cannot be completed until Task A is done (in Review column).
-
-### Dependency Functionality
-
-- **Set Dependencies** - In TaskModal, select which tasks this one depends on
-- **Blocked Status** - Tasks with incomplete dependencies show:
-  - 🔒 Lock icon
-  - Orange "Blocked by X tasks" banner
-  - Orange border styling
-  - Hover tooltip showing blocking tasks
-- **Dependency Validation**:
-  - Circular dependency detection (prevents A → B → A loops)
-  - Alert shown if circular dependency attempted
-  - Cannot depend on self
-- **Smart Status Detection**:
-  - Task is **blocked** if any dependency is not in "Review" column
-  - Task is **unblocked** when all dependencies are in "Review"
-- **Visual Indicators**:
-  - Blocked tasks highlighted in orange
-  - Dependency count shown on card
-  - List of blocking tasks on hover
-
-### Example Workflow
-
-1. **Setup Task**: Jason creates "Setup S3 bucket" (assigned to Jason)
-2. **Dependent Task**: Miti creates "Build S3 integration" (assigned to Miti)
-   - In TaskModal, check "Setup S3 bucket" under Dependencies
-   - Save task
-3. **Blocked State**: "Build S3 integration" shows as 🔒 **Blocked by 1 task**
-4. **Jason Completes**: Jason moves "Setup S3 bucket" to Review
-5. **Unblocked**: "Build S3 integration" automatically becomes unblocked
-6. **Miti Works**: Miti can now work on the integration task
-
-## 🎯 Epic Feature
-
-### What are Epics?
-
-Epics are large initiatives or themes that group related tasks together. For example:
-- **Q1 Platform Improvements** - All platform enhancement tasks
-- **Mobile App Launch** - iOS and Android development tasks
-- **Security Hardening** - Security-related work items
-
-### Epic Functionality
-
-- **Create Epics** - Define new epics with name, description, and color
-- **Link Tasks to Epics** - Assign tasks to epics when creating or editing
-- **Filter by Epic** - Click an epic in the sidebar to show only its tasks
-- **Visual Indicators** - Tasks display epic color badges on cards
-- **Task Counts** - Each epic shows how many tasks are linked to it
-- **Edit & Delete** - Manage epics with inline edit/delete actions (deleting an epic unlinks tasks, doesn't delete them)
+- **🎨 Dark Theme UI** - Sleek, modern interface with subtle borders and dark backgrounds
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and npm
+- AWS Account with DynamoDB access
+- AWS credentials (Access Key ID and Secret Access Key)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/yourusername/mission-control-kanban.git
 cd mission-control-kanban
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Start the development server:
+3. **Configure AWS credentials:**
+
+Create a `.env` file in the project root:
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your AWS credentials:
+```env
+AWS_ACCESS_KEY_ID=your_access_key_id_here
+AWS_SECRET_ACCESS_KEY=your_secret_access_key_here
+AWS_REGION=us-west-2
+DYNAMODB_TABLE_NAME=mission-control-tasks
+```
+
+**Getting AWS Credentials:**
+1. Log into AWS Console → IAM
+2. Create a new user (or use existing)
+3. Attach policy: `AmazonDynamoDBFullAccess`
+4. Create access keys under "Security credentials"
+5. Copy Access Key ID and Secret Access Key to `.env`
+
+4. **Create DynamoDB table:**
+```bash
+node scripts/setup-dynamodb.js
+```
+
+This creates the `mission-control-tasks` table with:
+- Primary keys: PK (partition), SK (sort)
+- GSI1: epicId-based queries
+- GSI2: assignee-based queries
+- Billing mode: On-demand (pay per request)
+
+5. **Start the development server:**
 ```bash
 npm run dev
 ```
 
-4. Open your browser to `http://localhost:5173`
+6. **Open your browser to `http://localhost:5173`**
+
+On first load, sample data will be automatically migrated to DynamoDB.
+
+## 🗄️ DynamoDB Schema
+
+### Single-Table Design
+
+The app uses a single-table design pattern for optimal DynamoDB performance:
+
+#### Epic Record
+```
+PK: EPIC#{epicId}
+SK: METADATA
+Attributes: name, description, color, createdAt
+```
+
+#### Task Record
+```
+PK: TASK#{taskId}
+SK: METADATA
+Attributes: title, description, column, epicId, assignedTo, tags, createdAt, updatedAt, completedAt
+```
+
+#### Task Dependency Records
+```
+DEPENDS_ON:
+  PK: TASK#{taskId}
+  SK: DEPENDS_ON#{dependentTaskId}
+
+BLOCKS:
+  PK: TASK#{dependentTaskId}
+  SK: BLOCKS#{taskId}
+```
+
+### Global Secondary Indexes (GSIs)
+
+**GSI1 - Epic Filter:**
+- PK: `epicId`
+- SK: `taskId`
+- Use case: Query all tasks for a specific epic
+
+**GSI2 - Assignee Filter:**
+- PK: `assignedTo`
+- SK: `createdAt`
+- Use case: Query all tasks for a specific assignee
+
+### Data Access Patterns
+
+| Pattern | Method | Index |
+|---------|--------|-------|
+| Get all epics | Scan | Main table |
+| Get all tasks | Scan | Main table |
+| Get tasks by epic | Query | GSI1 |
+| Get tasks by assignee | Query | GSI2 |
+| Get task dependencies | Query | Main table (PK + SK prefix) |
+| Create/Update/Delete | Put/Delete | Main table |
 
 ## 🛠️ Tech Stack
 
-- **React 18** - UI library
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first styling
+- **React 19** - UI library
+- **Vite 7** - Fast build tool and dev server
+- **Tailwind CSS 4** - Utility-first styling
 - **@dnd-kit** - Drag and drop functionality
-- **LocalStorage API** - Data persistence
+- **AWS SDK v3** - DynamoDB client
+- **DynamoDB** - NoSQL database (cloud-persisted data)
 
 ## 📦 Project Structure
 
 ```
 mission-control-kanban/
+├── scripts/
+│   └── setup-dynamodb.js       # DynamoDB table creation script
 ├── src/
 │   ├── components/
 │   │   ├── ActivityFeed.jsx    # Activity sidebar
-│   │   ├── Column.jsx           # Kanban column container
-│   │   ├── EpicSidebar.jsx      # Epic list and filtering sidebar
-│   │   ├── EpicModal.jsx        # Epic creation/editing modal
-│   │   ├── StatsBar.jsx         # Top statistics bar
-│   │   ├── TaskCard.jsx         # Individual task card with epic badge
-│   │   └── TaskModal.jsx        # Add/edit task modal with epic selector
-│   ├── App.jsx                  # Main app component
-│   ├── index.css                # Global styles
-│   └── main.jsx                 # Entry point
+│   │   ├── Column.jsx          # Kanban column container
+│   │   ├── EpicSidebar.jsx     # Epic list and filtering sidebar
+│   │   ├── EpicModal.jsx       # Epic creation/editing modal
+│   │   ├── StatsBar.jsx        # Top statistics bar
+│   │   ├── TaskCard.jsx        # Individual task card
+│   │   └── TaskModal.jsx       # Add/edit task modal
+│   ├── services/
+│   │   └── dynamodb.js         # DynamoDB service layer (CRUD operations)
+│   ├── App.jsx                 # Main app component
+│   ├── index.css               # Global styles
+│   └── main.jsx                # Entry point
+├── .env                        # AWS credentials (DO NOT COMMIT)
+├── .env.example                # Environment variable template
 ├── tailwind.config.js
+├── vite.config.js              # Vite config with env loading
 └── package.json
 ```
 
@@ -170,7 +181,7 @@ mission-control-kanban/
 #### Creating an Epic
 1. Click "+ New Epic" in the left sidebar
 2. Enter epic name, description (optional), and choose a color
-3. Click "Create" to save
+3. Click "Create" to save (persisted to DynamoDB)
 
 #### Editing an Epic
 1. Hover over an epic in the sidebar
@@ -185,30 +196,111 @@ mission-control-kanban/
 #### Filtering by Epic
 1. Click any epic in the sidebar to filter the board
 2. Only tasks linked to that epic will display
-3. Stats update to reflect the filtered view
-4. Click "All Tasks" to remove the filter
-
-### Creating Tasks
-1. Click "+ New Task" button
-2. Fill in title, description, select column
-3. **Select an Epic** from the dropdown (optional)
-4. Add tags
-5. Click "Create Task"
+3. Click "All Tasks" to remove the filter
 
 ### Managing Tasks
-- **Drag & Drop**: Click and drag tasks between columns
-- **Edit**: Hover over a task and click the ✏️ icon
-  - Change epic assignment in the edit modal
-- **Complete**: Click the ✓ icon to mark as done (moves to activity feed)
-- **Delete**: Click the 🗑️ icon to remove
-- **Epic Badge**: Task cards show a colored epic indicator when linked
 
-### Activity Feed
-The right sidebar shows all recent actions with timestamps, keeping you updated on task movements and changes. Activity feed is **not filtered** by epic - it shows all activity.
+#### Creating Tasks
+1. Click "+ New Task" button
+2. Fill in title, description, select column
+3. Select an Epic from the dropdown (optional)
+4. Select assignee (Miti, Jason, or Unassigned)
+5. Select dependencies (if any)
+6. Add tags
+7. Click "Create Task" (saved to DynamoDB)
+
+#### Task Operations
+- **Drag & Drop**: Click and drag tasks between columns (updates DynamoDB)
+- **Edit**: Hover over a task and click the ✏️ icon
+- **Complete**: Click the ✓ icon to mark as done
+- **Delete**: Click the 🗑️ icon to remove
+
+### Task Dependencies
+
+#### Setting Dependencies
+1. Open TaskModal (create or edit task)
+2. Scroll to "Dependencies" section
+3. Check tasks this one depends on
+4. Save task
+
+#### Blocked Tasks
+- Tasks with incomplete dependencies show 🔒 icon
+- Orange "Blocked by X tasks" banner
+- Cannot be completed until dependencies are in Review column
+
+## 👥 Assignee Feature
+
+### Assigning Tasks
+- **Miti** - Purple badge with "M" initial
+- **Jason** - Blue badge with "J" initial
+- **Unassigned** - No assignee set
+
+### Filtering by Assignee
+Click assignee in sidebar to show only their tasks:
+- "Everyone" - All tasks
+- "Miti" - Only Miti's tasks
+- "Jason" - Only Jason's tasks
+- "Unassigned" - Tasks with no assignee
+
+**Important:** Tasks assigned to Miti should be worked on by her. This enables future proactive task management.
+
+## 💾 Data Migration
+
+### From LocalStorage
+
+On first load, the app automatically checks for existing localStorage data and migrates it to DynamoDB:
+
+1. Detects empty DynamoDB table
+2. Checks for `kanban-tasks` and `kanban-epics` in localStorage
+3. Migrates data to DynamoDB
+4. Clears localStorage after successful migration
+
+### Manual Migration
+
+To manually migrate data:
+
+```js
+import { migrateData } from './src/services/dynamodb';
+
+await migrateData(epicsArray, tasksArray);
+```
+
+### Clear All Data
+
+To reset DynamoDB table:
+
+```js
+import { clearAllData } from './src/services/dynamodb';
+
+await clearAllData();
+```
 
 ## 🌐 Deployment
 
-### Deploy to AWS Amplify (Recommended)
+### Environment Variables
+
+**Important:** Never commit `.env` to version control!
+
+For production deployments, set environment variables in your hosting platform:
+
+**Vercel/Netlify:**
+- Go to Project Settings → Environment Variables
+- Add: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `DYNAMODB_TABLE_NAME`
+
+**AWS Amplify:**
+- Build settings → Environment variables
+- Add the same variables
+
+### Deploy to Vercel
+
+1. Push your code to GitHub
+2. Visit [vercel.com](https://vercel.com)
+3. Click "Import Project"
+4. Select your repository
+5. Add environment variables
+6. Click "Deploy"
+
+### Deploy to AWS Amplify
 
 1. Push your code to GitHub
 2. Visit [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
@@ -217,131 +309,102 @@ The right sidebar shows all recent actions with timestamps, keeping you updated 
 5. Configure build settings:
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
-   - **Node version**: 18+ (or use `.nvmrc` if needed)
-6. Click "Save and Deploy"
+6. Add environment variables
+7. Click "Save and Deploy"
 
-AWS Amplify will automatically deploy on every push to your main branch.
+## 🔒 Security Best Practices
 
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Visit [vercel.com](https://vercel.com)
-3. Click "Import Project"
-4. Select your repository
-5. Vercel auto-detects Vite - click "Deploy"
-
-### Deploy to GitHub Pages
-
-1. Install gh-pages:
-```bash
-npm install --save-dev gh-pages
-```
-
-2. Add to `package.json`:
-```json
-{
-  "homepage": "https://yourusername.github.io/mission-control-kanban",
-  "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  }
-}
-```
-
-3. Update `vite.config.js`:
-```js
-export default defineConfig({
-  base: '/mission-control-kanban/',
-  plugins: [react()],
-})
-```
-
-4. Deploy:
-```bash
-npm run deploy
-```
+1. **Never commit `.env` file** - Add to `.gitignore`
+2. **Use IAM roles in production** - Avoid hardcoded credentials
+3. **Limit IAM permissions** - Only grant DynamoDB access to specific table
+4. **Rotate credentials regularly** - Update access keys periodically
+5. **Use AWS Secrets Manager** - For production credential storage
 
 ## 🎨 Customization
 
 ### Epic Colors
-Epic colors are preset in `src/components/EpicModal.jsx` and `src/components/EpicSidebar.jsx`:
+Edit preset colors in `src/components/EpicModal.jsx`:
 
 ```js
 const PRESET_COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#f59e0b', // amber
-  '#10b981', // green
-  '#06b6d4', // cyan
-  '#f97316', // orange
-  '#ef4444', // red
-  '#14b8a6', // teal
-  '#6366f1', // indigo
+  '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
+  '#10b981', '#06b6d4', '#f97316', '#ef4444',
 ];
 ```
 
 ### Theme Colors
-Edit `tailwind.config.js` to customize the color scheme:
+Edit `tailwind.config.js`:
 
 ```js
 colors: {
   dark: {
-    bg: '#0a0a0f',      // Main background
-    card: '#15151f',    // Card background
-    border: '#2a2a3a',  // Border color
-    hover: '#1f1f2f',   // Hover state
+    bg: '#0a0a0f',
+    card: '#15151f',
+    border: '#2a2a3a',
   }
 }
 ```
 
-### Tags
-Add or modify tags in `src/components/TaskModal.jsx`:
-
-```js
-const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
-```
-
 ### Columns
-Modify columns in `src/App.jsx`:
+Modify in `src/App.jsx`:
 
 ```js
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
 ```
 
-## 💾 Data Structure
+## 🧪 Testing
 
-### Epic Object
-```js
-{
-  id: 'epic-1',
-  name: 'Q1 Platform Improvements',
-  description: 'Major platform enhancements for Q1 2026',
-  color: '#3b82f6',
-  createdAt: '2026-01-25T10:00:00.000Z'
-}
+### Test CRUD Operations
+
+```bash
+# Create table
+node scripts/setup-dynamodb.js
+
+# Start dev server
+npm run dev
+
+# Test in browser:
+# - Create epic
+# - Create task linked to epic
+# - Edit task
+# - Filter by epic
+# - Delete task
 ```
 
-### Task Object
+### Verify DynamoDB
+
+1. Log into AWS Console → DynamoDB
+2. Select `mission-control-tasks` table
+3. Click "Explore items"
+4. Verify records match app data
+
+## 📝 Troubleshooting
+
+### Error: "Failed to load data from DynamoDB"
+
+**Check:**
+1. AWS credentials in `.env` are correct
+2. DynamoDB table exists (`node scripts/setup-dynamodb.js`)
+3. IAM user has DynamoDB permissions
+4. Table region matches `.env` region
+
+### Table already exists error
+
+This is normal - the script checks before creating. If you need to recreate:
+
+1. Delete table in AWS Console
+2. Run `node scripts/setup-dynamodb.js` again
+
+### Build errors with environment variables
+
+Ensure `.env` variables are loaded in `vite.config.js`:
+
 ```js
-{
-  id: 1,
-  title: 'Fix authentication bug',
-  description: 'Users reporting login issues on mobile',
-  column: 'In Progress',
-  tags: ['bug', 'urgent'],
-  epicId: 'epic-1',  // Links to epic
-  assignedTo: 'Miti', // Assigned to Miti (or 'Jason', or null for unassigned)
-  dependsOn: [5, 8], // Array of task IDs this task depends on
-  createdAt: '2026-02-01T10:00:00.000Z',
-  updatedAt: '2026-02-03T15:30:00.000Z'
+define: {
+  'import.meta.env.VITE_AWS_ACCESS_KEY_ID': JSON.stringify(env.AWS_ACCESS_KEY_ID),
+  // ...
 }
 ```
-
-### Dependency Logic
-- **Blocked**: Task has dependencies AND any dependency is not in "Review" column
-- **Unblocked**: Task has no dependencies OR all dependencies are in "Review" column
-- **Circular Check**: System prevents circular dependencies (A → B → A)
 
 ## 📝 License
 
@@ -357,4 +420,4 @@ Give a ⭐️ if this project helped you!
 
 ---
 
-Built with ❤️ using React + Vite + Tailwind CSS
+Built with ❤️ using React + Vite + Tailwind CSS + AWS DynamoDB

@@ -7,9 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup:db": "node scripts/setup-dynamodb.js",
+    "verify:db": "node scripts/verify-table.js",
+    "test:db": "node scripts/test-dynamodb.js",
+    "load:sample": "node scripts/load-sample-data.js"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.982.0",
+    "@aws-sdk/lib-dynamodb": "^3.982.0",
+    "dotenv": "^17.2.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

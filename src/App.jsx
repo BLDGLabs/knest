@@ -8,6 +8,7 @@ import ActivityFeed from './components/ActivityFeed';
 import TaskModal from './components/TaskModal';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
+import * as db from './services/dynamodb';
 import './App.css';
 
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
@@ -134,6 +135,8 @@ function App() {
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [isEpicModalOpen, setIsEpicModalOpen] = useState(false);
   const [editingEpic, setEditingEpic] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -143,50 +146,95 @@ function App() {
     })
   );
 
-  // Load data from localStorage
+  // Load data from DynamoDB
   useEffect(() => {
-    const savedTasks = localStorage.getItem('kanban-tasks');
-    const savedEpics = localStorage.getItem('kanban-epics');
-    const savedActivities = localStorage.getItem('kanban-activities');
-    
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    } else {
-      // Initialize with sample data on first load
-      setTasks(SAMPLE_TASKS);
-      const welcomeActivity = {
-        id: Date.now(),
-        type: 'created',
-        taskTitle: 'Welcome to Mission Control! 🚀',
-        timestamp: new Date().toISOString(),
-      };
-      setActivities([welcomeActivity]);
-    }
-
-    if (savedEpics) {
-      setEpics(JSON.parse(savedEpics));
-    } else {
-      // Initialize with sample epics on first load
-      setEpics(SAMPLE_EPICS);
-    }
-    
-    if (savedActivities) {
-      setActivities(JSON.parse(savedActivities));
-    }
+    loadData();
   }, []);
 
-  // Save to localStorage
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Load epics and tasks from DynamoDB
+      const [loadedEpics, loadedTasks] = await Promise.all([
+        db.getAllEpics(),
+        db.getAllTasks(),
+      ]);
+
+      // Check if this is first load (no data in DynamoDB)
+      if (loadedEpics.length === 0 && loadedTasks.length === 0) {
+        // Check localStorage for migration
+        const savedTasks = localStorage.getItem('kanban-tasks');
+        const savedEpics = localStorage.getItem('kanban-epics');
+        
+        if (savedTasks || savedEpics) {
+          // Migrate from localStorage
+          console.log('Migrating data from localStorage to DynamoDB...');
+          const tasksToMigrate = savedTasks ? JSON.parse(savedTasks) : SAMPLE_TASKS;
+          const epicsToMigrate = savedEpics ? JSON.parse(savedEpics) : SAMPLE_EPICS;
+          
+          await db.migrateData(epicsToMigrate, tasksToMigrate);
+          
+          // Reload data
+          const [migratedEpics, migratedTasks] = await Promise.all([
+            db.getAllEpics(),
+            db.getAllTasks(),
+          ]);
+          
+          setEpics(migratedEpics);
+          setTasks(migratedTasks);
+          
+          // Clear localStorage after successful migration
+          localStorage.removeItem('kanban-tasks');
+          localStorage.removeItem('kanban-epics');
+          
+          console.log('✅ Migration complete!');
+        } else {
+          // First time setup - load sample data
+          console.log('First time setup - loading sample data...');
+          await db.migrateData(SAMPLE_EPICS, SAMPLE_TASKS);
+          
+          const [initialEpics, initialTasks] = await Promise.all([
+            db.getAllEpics(),
+            db.getAllTasks(),
+          ]);
+          
+          setEpics(initialEpics);
+          setTasks(initialTasks);
+          
+          const welcomeActivity = {
+            id: Date.now(),
+            type: 'created',
+            taskTitle: 'Welcome to Mission Control! 🚀',
+            timestamp: new Date().toISOString(),
+          };
+          setActivities([welcomeActivity]);
+        }
+      } else {
+        setEpics(loadedEpics);
+        setTasks(loadedTasks);
+      }
+
+      // Activities still stored in localStorage
+      const savedActivities = localStorage.getItem('kanban-activities');
+      if (savedActivities) {
+        setActivities(JSON.parse(savedActivities));
+      }
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Failed to load data from DynamoDB. Check console for details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save activities to localStorage
   useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
-    }
-    if (epics.length > 0) {
-      localStorage.setItem('kanban-epics', JSON.stringify(epics));
-    }
     if (activities.length > 0) {
       localStorage.setItem('kanban-activities', JSON.stringify(activities));
     }
-  }, [tasks, epics, activities]);
+  }, [activities]);
 
   const addActivity = (type, taskTitle, fromColumn = null, toColumn = null) => {
     const activity = {
@@ -204,7 +252,7 @@ function App() {
     setActiveId(event.active.id);
   };
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
     setActiveId(null);
 
@@ -214,39 +262,56 @@ function App() {
     const overColumn = over.id;
 
     if (activeTask && COLUMNS.includes(overColumn) && activeTask.column !== overColumn) {
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.id === active.id 
-            ? { ...task, column: overColumn, updatedAt: new Date().toISOString() }
-            : task
-        )
-      );
-      addActivity('moved', activeTask.title, activeTask.column, overColumn);
+      try {
+        // Optimistic update
+        setTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === active.id 
+              ? { ...task, column: overColumn, updatedAt: new Date().toISOString() }
+              : task
+          )
+        );
+        
+        // Update in DynamoDB
+        await db.updateTask(active.id, { column: overColumn });
+        addActivity('moved', activeTask.title, activeTask.column, overColumn);
+      } catch (err) {
+        console.error('Error updating task:', err);
+        // Revert on error
+        await loadData();
+      }
     }
   };
 
-  const handleAddTask = (taskData) => {
-    if (editingTask) {
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === editingTask.id
-            ? { ...task, ...taskData, updatedAt: new Date().toISOString() }
-            : task
-        )
-      );
-      addActivity('edited', taskData.title);
-    } else {
-      const newTask = {
-        id: Date.now(),
-        ...taskData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setTasks(prevTasks => [...prevTasks, newTask]);
-      addActivity('created', taskData.title);
+  const handleAddTask = async (taskData) => {
+    try {
+      if (editingTask) {
+        // Update existing task
+        const updatedTask = await db.updateTask(editingTask.id, taskData);
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === editingTask.id ? updatedTask : task
+          )
+        );
+        addActivity('edited', taskData.title);
+      } else {
+        // Create new task
+        const newTask = {
+          id: Date.now(),
+          ...taskData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await db.createTask(newTask);
+        setTasks(prevTasks => [...prevTasks, newTask]);
+        addActivity('created', taskData.title);
+      }
+      setIsModalOpen(false);
+      setEditingTask(null);
+    } catch (err) {
+      console.error('Error saving task:', err);
+      alert('Failed to save task. Please try again.');
     }
-    setIsModalOpen(false);
-    setEditingTask(null);
   };
 
   const handleEditTask = (task) => {
@@ -254,32 +319,44 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteTask = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    setTasks(prevTasks => prevTasks.filter(t => t.id !== taskId));
-    if (task) {
-      addActivity('deleted', task.title);
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const task = tasks.find(t => t.id === taskId);
+      await db.deleteTask(taskId);
+      setTasks(prevTasks => prevTasks.filter(t => t.id !== taskId));
+      if (task) {
+        addActivity('deleted', task.title);
+      }
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      alert('Failed to delete task. Please try again.');
     }
   };
 
-  const handleCompleteTask = (taskId) => {
+  const handleCompleteTask = async (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       addActivity('completed', task.title);
-      handleDeleteTask(taskId);
+      await handleDeleteTask(taskId);
     }
   };
 
   // Epic handlers
-  const handleCreateEpic = (epicData) => {
-    const newEpic = {
-      id: `epic-${Date.now()}`,
-      ...epicData,
-      createdAt: new Date().toISOString(),
-    };
-    setEpics(prevEpics => [...prevEpics, newEpic]);
-    addActivity('created', `Epic: ${epicData.name}`);
-    setIsEpicModalOpen(false);
+  const handleCreateEpic = async (epicData) => {
+    try {
+      const newEpic = {
+        id: `epic-${Date.now()}`,
+        ...epicData,
+        createdAt: new Date().toISOString(),
+      };
+      await db.createEpic(newEpic);
+      setEpics(prevEpics => [...prevEpics, newEpic]);
+      addActivity('created', `Epic: ${epicData.name}`);
+      setIsEpicModalOpen(false);
+    } catch (err) {
+      console.error('Error creating epic:', err);
+      alert('Failed to create epic. Please try again.');
+    }
   };
 
   const handleEditEpic = (epic) => {
@@ -287,35 +364,49 @@ function App() {
     setIsEpicModalOpen(true);
   };
 
-  const handleSaveEpic = (epicData) => {
-    if (editingEpic) {
-      setEpics(prevEpics =>
-        prevEpics.map(epic =>
-          epic.id === editingEpic.id ? { ...epic, ...epicData } : epic
-        )
-      );
-      addActivity('edited', `Epic: ${epicData.name}`);
-    } else {
-      handleCreateEpic(epicData);
+  const handleSaveEpic = async (epicData) => {
+    try {
+      if (editingEpic) {
+        await db.updateEpic(editingEpic.id, epicData);
+        setEpics(prevEpics =>
+          prevEpics.map(epic =>
+            epic.id === editingEpic.id ? { ...epic, ...epicData } : epic
+          )
+        );
+        addActivity('edited', `Epic: ${epicData.name}`);
+      } else {
+        await handleCreateEpic(epicData);
+      }
+      setIsEpicModalOpen(false);
+      setEditingEpic(null);
+    } catch (err) {
+      console.error('Error saving epic:', err);
+      alert('Failed to save epic. Please try again.');
     }
-    setIsEpicModalOpen(false);
-    setEditingEpic(null);
   };
 
-  const handleDeleteEpic = (epicId) => {
-    const epic = epics.find(e => e.id === epicId);
-    // Remove epicId from all tasks linked to this epic
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.epicId === epicId ? { ...task, epicId: null } : task
-      )
-    );
-    setEpics(prevEpics => prevEpics.filter(e => e.id !== epicId));
-    if (epic) {
-      addActivity('deleted', `Epic: ${epic.name}`);
-    }
-    if (selectedEpicId === epicId) {
-      setSelectedEpicId(null);
+  const handleDeleteEpic = async (epicId) => {
+    try {
+      const epic = epics.find(e => e.id === epicId);
+      await db.deleteEpic(epicId);
+      
+      // Update local state
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.epicId === epicId ? { ...task, epicId: null } : task
+        )
+      );
+      setEpics(prevEpics => prevEpics.filter(e => e.id !== epicId));
+      
+      if (epic) {
+        addActivity('deleted', `Epic: ${epic.name}`);
+      }
+      if (selectedEpicId === epicId) {
+        setSelectedEpicId(null);
+      }
+    } catch (err) {
+      console.error('Error deleting epic:', err);
+      alert('Failed to delete epic. Please try again.');
     }
   };
 
@@ -390,6 +481,35 @@ function App() {
   };
 
   const activeTask = tasks.find(t => t.id === activeId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading Mission Control...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2">Error Loading Data</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-bg text-white flex">
