@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
+const ASSIGNEES = ['Jason', 'Miti'];
 
 const TaskModal = ({ task, epics, onSave, onClose }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
     column: 'Backlog',
     tags: [],
     epicId: null,
+    assignedTo: null,
   });
 
   useEffect(() => {
@@ -20,6 +22,7 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
         column: task.column || 'Backlog',
         tags: task.tags || [],
         epicId: task.epicId || null,
+        assignedTo: task.assignedTo || null,
       });
     }
   }, [task]);
@@ -107,6 +110,39 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
                 <span>{epics.find(e => e.id === formData.epicId).name}</span>
               </div>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Assigned To</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, assignedTo: null }))}
+                className={`flex-1 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                  formData.assignedTo === null
+                    ? 'bg-gray-600 border-gray-500 text-white'
+                    : 'bg-dark-hover border-dark-border text-gray-400 hover:border-gray-600'
+                }`}
+              >
+                Unassigned
+              </button>
+              {ASSIGNEES.map(assignee => (
+                <button
+                  key={assignee}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, assignedTo: assignee }))}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    formData.assignedTo === assignee
+                      ? assignee === 'Miti' 
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-blue-600 border-blue-500 text-white'
+                      : 'bg-dark-hover border-dark-border text-gray-400 hover:border-gray-600'
+                  }`}
+                >
+                  {assignee}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

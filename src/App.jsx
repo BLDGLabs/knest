@@ -44,6 +44,7 @@ const SAMPLE_TASKS = [
     column: 'Recurring',
     tags: ['feature'],
     epicId: null,
+    assignedTo: null,
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -54,6 +55,7 @@ const SAMPLE_TASKS = [
     column: 'Recurring',
     tags: ['improvement'],
     epicId: null,
+    assignedTo: 'Miti',
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
@@ -64,6 +66,7 @@ const SAMPLE_TASKS = [
     column: 'In Progress',
     tags: ['bug', 'urgent'],
     epicId: 'epic-3',
+    assignedTo: 'Miti',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 1800000).toISOString(),
   },
@@ -74,6 +77,7 @@ const SAMPLE_TASKS = [
     column: 'Backlog',
     tags: ['feature'],
     epicId: 'epic-1',
+    assignedTo: 'Jason',
     createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
@@ -84,6 +88,7 @@ const SAMPLE_TASKS = [
     column: 'Review',
     tags: ['documentation'],
     epicId: 'epic-1',
+    assignedTo: 'Jason',
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -94,6 +99,7 @@ const SAMPLE_TASKS = [
     column: 'Backlog',
     tags: ['improvement'],
     epicId: 'epic-1',
+    assignedTo: 'Miti',
     createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
@@ -104,6 +110,7 @@ const SAMPLE_TASKS = [
     column: 'In Progress',
     tags: ['feature'],
     epicId: 'epic-2',
+    assignedTo: 'Jason',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 900000).toISOString(),
   },
@@ -117,6 +124,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [selectedEpicId, setSelectedEpicId] = useState(null);
+  const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [isEpicModalOpen, setIsEpicModalOpen] = useState(false);
   const [editingEpic, setEditingEpic] = useState(null);
 
@@ -312,15 +320,35 @@ function App() {
       filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
     }
     
+    // Apply assignee filter if selected
+    if (selectedAssignee !== null) {
+      if (selectedAssignee === 'unassigned') {
+        filteredTasks = filteredTasks.filter(task => !task.assignedTo);
+      } else {
+        filteredTasks = filteredTasks.filter(task => task.assignedTo === selectedAssignee);
+      }
+    }
+    
     return filteredTasks;
   };
 
   // Get filtered tasks for stats
   const getFilteredTasks = () => {
-    if (selectedEpicId === null) {
-      return tasks;
+    let filteredTasks = tasks;
+    
+    if (selectedEpicId !== null) {
+      filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
     }
-    return tasks.filter(task => task.epicId === selectedEpicId);
+    
+    if (selectedAssignee !== null) {
+      if (selectedAssignee === 'unassigned') {
+        filteredTasks = filteredTasks.filter(task => !task.assignedTo);
+      } else {
+        filteredTasks = filteredTasks.filter(task => task.assignedTo === selectedAssignee);
+      }
+    }
+    
+    return filteredTasks;
   };
 
   const activeTask = tasks.find(t => t.id === activeId);
@@ -332,6 +360,8 @@ function App() {
         epics={epics}
         selectedEpicId={selectedEpicId}
         onSelectEpic={setSelectedEpicId}
+        selectedAssignee={selectedAssignee}
+        onSelectAssignee={setSelectedAssignee}
         onCreateEpic={handleCreateEpic}
         onEditEpic={handleEditEpic}
         onDeleteEpic={handleDeleteEpic}
@@ -348,12 +378,21 @@ function App() {
                 Mission Control
               </h1>
               <p className="text-gray-400 text-sm mt-1">
-                {selectedEpicId ? (
+                {selectedEpicId || selectedAssignee ? (
                   <>
-                    Filtered by Epic:{' '}
-                    <span className="text-white font-medium">
-                      {epics.find(e => e.id === selectedEpicId)?.name}
-                    </span>
+                    {selectedEpicId && (
+                      <>
+                        Epic: <span className="text-white font-medium">{epics.find(e => e.id === selectedEpicId)?.name}</span>
+                      </>
+                    )}
+                    {selectedEpicId && selectedAssignee && <span className="mx-1">•</span>}
+                    {selectedAssignee && (
+                      <>
+                        Assignee: <span className="text-white font-medium">
+                          {selectedAssignee === 'unassigned' ? 'Unassigned' : selectedAssignee}
+                        </span>
+                      </>
+                    )}
                   </>
                 ) : (
                   'Your tasks, organized and tracked'

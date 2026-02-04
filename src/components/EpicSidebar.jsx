@@ -1,11 +1,38 @@
 import React, { useState } from 'react';
 
-const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEditEpic, onDeleteEpic, tasks }) => {
+const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEditEpic, onDeleteEpic, tasks, selectedAssignee, onSelectAssignee }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   const getTaskCountForEpic = (epicId) => {
-    return tasks.filter(task => task.epicId === epicId).length;
+    let filteredTasks = tasks.filter(task => task.epicId === epicId);
+    if (selectedAssignee) {
+      filteredTasks = filteredTasks.filter(task => task.assignedTo === selectedAssignee);
+    }
+    return filteredTasks.length;
+  };
+
+  const getAllTasksCount = () => {
+    if (selectedAssignee) {
+      return tasks.filter(task => task.assignedTo === selectedAssignee).length;
+    }
+    return tasks.length;
+  };
+
+  const getAssigneeTaskCount = (assignee) => {
+    let filteredTasks = tasks.filter(task => task.assignedTo === assignee);
+    if (selectedEpicId !== null) {
+      filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
+    }
+    return filteredTasks.length;
+  };
+
+  const getUnassignedTaskCount = () => {
+    let filteredTasks = tasks.filter(task => !task.assignedTo);
+    if (selectedEpicId !== null) {
+      filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
+    }
+    return filteredTasks.length;
   };
 
   const handleCreateClick = () => {
@@ -50,6 +77,77 @@ const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEdit
 
       {/* Epic List */}
       <div className="flex-1 overflow-y-auto p-2">
+        {/* Assignee Filter Section */}
+        <div className="mb-4 pb-3 border-b border-dark-border">
+          <div className="text-xs font-semibold text-gray-400 mb-2 px-1">ASSIGNED TO</div>
+          <div className="space-y-1">
+            <button
+              onClick={() => onSelectAssignee(null)}
+              className={`w-full text-left px-2 py-1.5 rounded text-sm transition-all ${
+                selectedAssignee === null
+                  ? 'bg-dark-hover text-white font-medium'
+                  : 'text-gray-400 hover:bg-dark-hover/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>Everyone</span>
+                <span className="text-xs bg-dark-bg px-1.5 py-0.5 rounded">{tasks.length}</span>
+              </div>
+            </button>
+            <button
+              onClick={() => onSelectAssignee('Miti')}
+              className={`w-full text-left px-2 py-1.5 rounded text-sm transition-all ${
+                selectedAssignee === 'Miti'
+                  ? 'bg-purple-600/20 text-purple-300 font-medium border border-purple-500/30'
+                  : 'text-gray-400 hover:bg-dark-hover/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-xs font-bold text-purple-400">
+                    M
+                  </div>
+                  <span>Miti</span>
+                </div>
+                <span className="text-xs bg-dark-bg px-1.5 py-0.5 rounded">{getAssigneeTaskCount('Miti')}</span>
+              </div>
+            </button>
+            <button
+              onClick={() => onSelectAssignee('Jason')}
+              className={`w-full text-left px-2 py-1.5 rounded text-sm transition-all ${
+                selectedAssignee === 'Jason'
+                  ? 'bg-blue-600/20 text-blue-300 font-medium border border-blue-500/30'
+                  : 'text-gray-400 hover:bg-dark-hover/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-xs font-bold text-blue-400">
+                    J
+                  </div>
+                  <span>Jason</span>
+                </div>
+                <span className="text-xs bg-dark-bg px-1.5 py-0.5 rounded">{getAssigneeTaskCount('Jason')}</span>
+              </div>
+            </button>
+            <button
+              onClick={() => onSelectAssignee('unassigned')}
+              className={`w-full text-left px-2 py-1.5 rounded text-sm transition-all ${
+                selectedAssignee === 'unassigned'
+                  ? 'bg-dark-hover text-white font-medium'
+                  : 'text-gray-400 hover:bg-dark-hover/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>Unassigned</span>
+                <span className="text-xs bg-dark-bg px-1.5 py-0.5 rounded">{getUnassignedTaskCount()}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Epic Filter Section */}
+        <div className="text-xs font-semibold text-gray-400 mb-2 px-1">EPICS</div>
         {/* All Tasks Option */}
         <button
           onClick={() => onSelectEpic(null)}
@@ -62,10 +160,10 @@ const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEdit
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"></div>
-              <span className="font-medium">All Tasks</span>
+              <span className="font-medium">All Epics</span>
             </div>
             <span className="text-xs text-gray-500 font-semibold bg-dark-bg px-2 py-0.5 rounded">
-              {tasks.length}
+              {getAllTasksCount()}
             </span>
           </div>
         </button>

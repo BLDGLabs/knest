@@ -10,6 +10,16 @@ const TAG_COLORS = {
   documentation: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
 };
 
+const ASSIGNEE_COLORS = {
+  'Miti': 'bg-purple-500/20 text-purple-400 border-purple-500/40',
+  'Jason': 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+};
+
+const ASSIGNEE_INITIALS = {
+  'Miti': 'M',
+  'Jason': 'J',
+};
+
 const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic }) => {
   const {
     attributes,
@@ -48,7 +58,17 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic }) => {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
+            {task.assignedTo && (
+              <div 
+                className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border ${ASSIGNEE_COLORS[task.assignedTo]}`}
+                title={`Assigned to ${task.assignedTo}`}
+              >
+                {ASSIGNEE_INITIALS[task.assignedTo]}
+              </div>
+            )}
+          </div>
           {epic && (
             <div className="flex items-center gap-1.5 mt-1.5">
               <div 

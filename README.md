@@ -8,16 +8,45 @@ A modern, dark-themed Kanban task board built with React, featuring drag-and-dro
 
 - **🎯 Epic Management** - Organize tasks into Epics (large initiatives) with color-coded indicators
 - **🔍 Epic Filtering** - Filter the entire board by Epic to focus on specific work streams
+- **👤 Assignee System** - Assign tasks to Jason, Miti, or leave Unassigned
+- **🎨 Assignee Filtering** - Filter board by assignee to see "My Tasks" or team member tasks
 - **🎨 Dark Theme UI** - Sleek, modern interface with subtle borders and dark backgrounds
 - **📊 4 Kanban Columns** - Recurring, Backlog, In Progress, Review
 - **🔄 Drag & Drop** - Intuitive task management with @dnd-kit
 - **🏷️ Color-Coded Tags** - Organize tasks with bug, feature, improvement, urgent, and documentation labels
-- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate (updates based on Epic filter)
+- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate (updates based on filters)
 - **📋 Activity Feed** - Real-time sidebar showing recent actions (created, moved, completed, deleted)
 - **💾 Local Storage** - All data persists in browser, no backend needed
 - **✏️ Full CRUD** - Add, edit, delete, and complete tasks and epics with ease
 - **⏱️ Smart Timestamps** - Relative time display (e.g., "2h ago")
 - **📱 Collapsible Sidebar** - Epic sidebar can be collapsed to maximize board space
+
+## 👥 Assignee Feature
+
+### Assigning Tasks
+
+Tasks can be assigned to team members to track ownership and responsibility.
+
+**Available assignees:**
+- **Miti** - Purple badge with "M" initial
+- **Jason** - Blue badge with "J" initial
+- **Unassigned** - No assignee set
+
+### Assignee Functionality
+
+- **Assign in TaskModal** - Select assignee when creating or editing tasks using button group
+- **Visual Badges** - Task cards display assignee initials in colored circles (M for Miti, J for Jason)
+- **Filter by Assignee** - Click assignee in sidebar to show only their tasks
+  - "Everyone" - Shows all tasks
+  - "Miti" - Shows only Miti's tasks
+  - "Jason" - Shows only Jason's tasks
+  - "Unassigned" - Shows tasks with no assignee
+- **Task Counts** - Each assignee shows real-time task count
+- **Combined Filtering** - Assignee and Epic filters work together (e.g., "Miti's tasks in Q1 Platform Improvements Epic")
+
+### Important Context
+
+**If tasks are assigned to Miti, she should work on them.** This sets up future functionality where Miti can proactively identify and work on her assigned tasks.
 
 ## 🎯 Epic Feature
 
@@ -259,6 +288,7 @@ const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
   column: 'In Progress',
   tags: ['bug', 'urgent'],
   epicId: 'epic-1',  // Links to epic
+  assignedTo: 'Miti', // Assigned to Miti (or 'Jason', or null for unassigned)
   createdAt: '2026-02-01T10:00:00.000Z',
   updatedAt: '2026-02-03T15:30:00.000Z'
 }
