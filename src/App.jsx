@@ -4,7 +4,6 @@ import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import StatsBar from './components/StatsBar';
 import Column from './components/Column';
 import TaskCard from './components/TaskCard';
-import ActivityFeed from './components/ActivityFeed';
 import TaskModal from './components/TaskModal';
 import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
@@ -13,7 +12,7 @@ import MitiStatusWidget from './components/MitiStatusWidget';
 import * as db from './services/dynamodb';
 import './App.css';
 
-const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
+const COLUMNS = ['Backlog', 'In Progress', 'Done'];
 
 const SAMPLE_EPICS = [
   {
@@ -140,7 +139,7 @@ function App() {
   const [quickViewTask, setQuickViewTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mobileColumnIndex, setMobileColumnIndex] = useState(1); // Start on Backlog
+  const [mobileColumnIndex, setMobileColumnIndex] = useState(0); // Start on Backlog
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const sensors = useSensors(
@@ -494,8 +493,8 @@ function App() {
     
     return task.dependsOn.some(depId => {
       const depTask = tasks.find(t => t.id === depId);
-      // Task is blocked if dependency doesn't exist or isn't in Review column
-      return !depTask || depTask.column !== 'Review';
+      // Task is blocked if dependency doesn't exist or isn't in Done column
+      return !depTask || depTask.column !== 'Done';
     });
   };
 
@@ -504,7 +503,7 @@ function App() {
     
     return task.dependsOn
       .map(depId => tasks.find(t => t.id === depId))
-      .filter(t => t && t.column !== 'Review');
+      .filter(t => t && t.column !== 'Done');
   };
 
   const checkCircularDependency = (taskId, dependencyId, visited = new Set()) => {
@@ -661,17 +660,17 @@ function App() {
             ))}
           </div>
 
-          <div className="flex gap-4 md:gap-6 mt-4 md:mt-6">
+          <div className="flex-1 mt-4 md:mt-6">
             {/* Main Board */}
-            <div className="flex-1 min-w-0">
+            <div className="w-full">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
               >
-                {/* Desktop: 4 columns */}
-                <div className="hidden md:grid md:grid-cols-4 gap-4">
+                {/* Desktop: 3 columns */}
+                <div className="hidden md:grid md:grid-cols-3 gap-6">
                   {COLUMNS.map(column => (
                     <Column
                       key={column}
@@ -753,11 +752,6 @@ function App() {
                   ) : null}
                 </DragOverlay>
               </DndContext>
-            </div>
-
-            {/* Activity Feed - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <ActivityFeed activities={activities} />
             </div>
           </div>
         </div>
