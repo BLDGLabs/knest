@@ -228,7 +228,7 @@ function App() {
           const welcomeActivity = {
             id: Date.now(),
             type: 'created',
-            taskTitle: 'Welcome to Mission Control! 🚀',
+            taskTitle: 'Welcome to Knest! 🦉',
             timestamp: new Date().toISOString(),
           };
           setActivities([welcomeActivity]);
@@ -542,7 +542,7 @@ function App() {
       <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading Mission Control...</p>
+          <p className="text-gray-400">Loading Knest...</p>
         </div>
       </div>
     );
@@ -613,8 +613,9 @@ function App() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  Mission Control
+                <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
+                  <span className="text-2xl md:text-3xl">🦉</span>
+                  Knest
                 </h1>
                 <p className="text-gray-400 text-xs md:text-sm mt-0.5 md:mt-1 hidden sm:block">
                   {selectedEpicId || selectedAssignee ? (
