@@ -163,8 +163,13 @@ function App() {
           db.getAllEpics(),
           db.getAllTasks(),
         ]);
-        setEpics(loadedEpics);
-        setTasks(loadedTasks);
+        // Only update if we got valid data (prevent clearing on network hiccups)
+        if (loadedEpics.length > 0 || loadedTasks.length > 0) {
+          setEpics(loadedEpics);
+          setTasks(loadedTasks);
+        } else {
+          console.warn('Polling returned empty data, skipping update');
+        }
       } catch (err) {
         console.error('Polling error:', err);
       }
