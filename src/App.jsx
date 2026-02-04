@@ -45,6 +45,7 @@ const SAMPLE_TASKS = [
     tags: ['feature'],
     epicId: null,
     assignedTo: null,
+    dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -56,6 +57,7 @@ const SAMPLE_TASKS = [
     tags: ['improvement'],
     epicId: null,
     assignedTo: 'Miti',
+    dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
@@ -67,6 +69,7 @@ const SAMPLE_TASKS = [
     tags: ['bug', 'urgent'],
     epicId: 'epic-3',
     assignedTo: 'Miti',
+    dependsOn: [],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 1800000).toISOString(),
   },
@@ -78,6 +81,7 @@ const SAMPLE_TASKS = [
     tags: ['feature'],
     epicId: 'epic-1',
     assignedTo: 'Jason',
+    dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
@@ -89,6 +93,7 @@ const SAMPLE_TASKS = [
     tags: ['documentation'],
     epicId: 'epic-1',
     assignedTo: 'Jason',
+    dependsOn: [6],
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -100,6 +105,7 @@ const SAMPLE_TASKS = [
     tags: ['improvement'],
     epicId: 'epic-1',
     assignedTo: 'Miti',
+    dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
@@ -111,6 +117,7 @@ const SAMPLE_TASKS = [
     tags: ['feature'],
     epicId: 'epic-2',
     assignedTo: 'Jason',
+    dependsOn: [4],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 900000).toISOString(),
   },
@@ -351,6 +358,37 @@ function App() {
     return filteredTasks;
   };
 
+  // Dependency helper functions
+  const isTaskBlocked = (task) => {
+    if (!task.dependsOn || task.dependsOn.length === 0) return false;
+    
+    return task.dependsOn.some(depId => {
+      const depTask = tasks.find(t => t.id === depId);
+      // Task is blocked if dependency doesn't exist or isn't in Review column
+      return !depTask || depTask.column !== 'Review';
+    });
+  };
+
+  const getBlockingTasks = (task) => {
+    if (!task.dependsOn || task.dependsOn.length === 0) return [];
+    
+    return task.dependsOn
+      .map(depId => tasks.find(t => t.id === depId))
+      .filter(t => t && t.column !== 'Review');
+  };
+
+  const checkCircularDependency = (taskId, dependencyId, visited = new Set()) => {
+    if (taskId === dependencyId) return true;
+    if (visited.has(dependencyId)) return false;
+    
+    visited.add(dependencyId);
+    
+    const depTask = tasks.find(t => t.id === dependencyId);
+    if (!depTask || !depTask.dependsOn) return false;
+    
+    return depTask.dependsOn.some(id => checkCircularDependency(taskId, id, visited));
+  };
+
   const activeTask = tasks.find(t => t.id === activeId);
 
   return (
@@ -433,6 +471,9 @@ function App() {
                       onDeleteTask={handleDeleteTask}
                       onCompleteTask={handleCompleteTask}
                       epics={epics}
+                      allTasks={tasks}
+                      isTaskBlocked={isTaskBlocked}
+                      getBlockingTasks={getBlockingTasks}
                     />
                   ))}
                 </div>
@@ -442,6 +483,8 @@ function App() {
                       task={activeTask} 
                       isDragging 
                       epic={epics.find(e => e.id === activeTask.epicId)}
+                      isBlocked={isTaskBlocked(activeTask)}
+                      blockingTasks={getBlockingTasks(activeTask)}
                     />
                   ) : null}
                 </DragOverlay>
@@ -459,11 +502,13 @@ function App() {
         <TaskModal
           task={editingTask}
           epics={epics}
+          allTasks={tasks}
           onSave={handleAddTask}
           onClose={() => {
             setIsModalOpen(false);
             setEditingTask(null);
           }}
+          checkCircularDependency={checkCircularDependency}
         />
       )}
 

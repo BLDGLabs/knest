@@ -4,7 +4,7 @@ const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
 const ASSIGNEES = ['Jason', 'Miti'];
 
-const TaskModal = ({ task, epics, onSave, onClose }) => {
+const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDependency }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -12,6 +12,7 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
     tags: [],
     epicId: null,
     assignedTo: null,
+    dependsOn: [],
   });
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
         tags: task.tags || [],
         epicId: task.epicId || null,
         assignedTo: task.assignedTo || null,
+        dependsOn: task.dependsOn || [],
       });
     }
   }, [task]);
@@ -40,6 +42,27 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
         ? prev.tags.filter(t => t !== tag)
         : [...prev.tags, tag],
     }));
+  };
+
+  const toggleDependency = (taskId) => {
+    // Check for circular dependency
+    if (task && checkCircularDependency && checkCircularDependency(task.id, taskId)) {
+      alert('Cannot add this dependency: it would create a circular dependency!');
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      dependsOn: prev.dependsOn.includes(taskId)
+        ? prev.dependsOn.filter(id => id !== taskId)
+        : [...prev.dependsOn, taskId],
+    }));
+  };
+
+  // Get available tasks for dependencies (exclude self)
+  const getAvailableDependencies = () => {
+    if (!allTasks) return [];
+    return allTasks.filter(t => !task || t.id !== task.id);
   };
 
   return (
@@ -163,6 +186,59 @@ const TaskModal = ({ task, epics, onSave, onClose }) => {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Dependencies
+              <span className="text-xs text-gray-500 ml-2">
+                (This task depends on...)
+              </span>
+            </label>
+            {getAvailableDependencies().length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No other tasks available</p>
+            ) : (
+              <div className="max-h-40 overflow-y-auto border border-dark-border rounded-lg">
+                {getAvailableDependencies().map(t => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleDependency(t.id)}
+                    className={`w-full text-left px-3 py-2 text-sm border-b border-dark-border/30 last:border-b-0 transition-colors ${
+                      formData.dependsOn.includes(t.id)
+                        ? 'bg-orange-600/20 text-orange-300'
+                        : 'hover:bg-dark-hover/50 text-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={formData.dependsOn.includes(t.id)}
+                          onChange={() => {}}
+                          className="w-4 h-4 rounded border-gray-600 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="truncate">{t.title}</span>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        t.column === 'Review' 
+                          ? 'bg-green-600/20 text-green-400' 
+                          : 'bg-gray-600/20 text-gray-400'
+                      }`}>
+                        {t.column}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {formData.dependsOn.length > 0 && (
+              <div className="mt-2 text-xs text-gray-400">
+                <span className="font-medium text-orange-400">
+                  {formData.dependsOn.length} {formData.dependsOn.length === 1 ? 'dependency' : 'dependencies'}
+                </span> selected
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

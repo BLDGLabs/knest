@@ -20,7 +20,7 @@ const ASSIGNEE_INITIALS = {
   'Jason': 'J',
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic }) => {
+const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBlocked, blockingTasks }) => {
   const {
     attributes,
     listeners,
@@ -54,8 +54,25 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-dark-hover/80 backdrop-blur-sm border border-dark-border/40 rounded-xl p-5 cursor-grab active:cursor-grabbing hover:border-gray-500/50 transition-all duration-200 group shadow-xl hover:shadow-2xl hover:shadow-black/50 shadow-black/40 hover:-translate-y-0.5"
+      className={`bg-dark-hover/80 backdrop-blur-sm border rounded-xl p-5 cursor-grab active:cursor-grabbing hover:border-gray-500/50 transition-all duration-200 group shadow-xl hover:shadow-2xl hover:shadow-black/50 shadow-black/40 hover:-translate-y-0.5 ${
+        isBlocked 
+          ? 'border-orange-500/40 bg-dark-hover/60' 
+          : 'border-dark-border/40'
+      }`}
     >
+      {/* Blocked indicator */}
+      {isBlocked && blockingTasks && blockingTasks.length > 0 && (
+        <div 
+          className="mb-3 flex items-center gap-2 px-2 py-1.5 bg-orange-600/10 border border-orange-500/30 rounded-lg"
+          title={`Blocked by: ${blockingTasks.map(t => t.title).join(', ')}`}
+        >
+          <span className="text-orange-400 text-sm">🔒</span>
+          <span className="text-xs text-orange-300 font-medium">
+            Blocked by {blockingTasks.length} {blockingTasks.length === 1 ? 'task' : 'tasks'}
+          </span>
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">

@@ -10,6 +10,8 @@ A modern, dark-themed Kanban task board built with React, featuring drag-and-dro
 - **🔍 Epic Filtering** - Filter the entire board by Epic to focus on specific work streams
 - **👤 Assignee System** - Assign tasks to Jason, Miti, or leave Unassigned
 - **🎨 Assignee Filtering** - Filter board by assignee to see "My Tasks" or team member tasks
+- **🔗 Task Dependencies** - Create dependency chains with visual blocked indicators
+- **🔒 Dependency Blocking** - Tasks show "blocked" status when dependencies are incomplete
 - **🎨 Dark Theme UI** - Sleek, modern interface with subtle borders and dark backgrounds
 - **📊 4 Kanban Columns** - Recurring, Backlog, In Progress, Review
 - **🔄 Drag & Drop** - Intuitive task management with @dnd-kit
@@ -47,6 +49,47 @@ Tasks can be assigned to team members to track ownership and responsibility.
 ### Important Context
 
 **If tasks are assigned to Miti, she should work on them.** This sets up future functionality where Miti can proactively identify and work on her assigned tasks.
+
+## 🔗 Task Dependencies Feature
+
+### What are Task Dependencies?
+
+Task dependencies create relationships between tasks, ensuring work happens in the correct order. For example:
+- **Task A**: "Jason sets up S3 bucket" (assigned to Jason)
+- **Task B**: "Miti builds S3 integration" (assigned to Miti, **depends on Task A**)
+
+Task B cannot be completed until Task A is done (in Review column).
+
+### Dependency Functionality
+
+- **Set Dependencies** - In TaskModal, select which tasks this one depends on
+- **Blocked Status** - Tasks with incomplete dependencies show:
+  - 🔒 Lock icon
+  - Orange "Blocked by X tasks" banner
+  - Orange border styling
+  - Hover tooltip showing blocking tasks
+- **Dependency Validation**:
+  - Circular dependency detection (prevents A → B → A loops)
+  - Alert shown if circular dependency attempted
+  - Cannot depend on self
+- **Smart Status Detection**:
+  - Task is **blocked** if any dependency is not in "Review" column
+  - Task is **unblocked** when all dependencies are in "Review"
+- **Visual Indicators**:
+  - Blocked tasks highlighted in orange
+  - Dependency count shown on card
+  - List of blocking tasks on hover
+
+### Example Workflow
+
+1. **Setup Task**: Jason creates "Setup S3 bucket" (assigned to Jason)
+2. **Dependent Task**: Miti creates "Build S3 integration" (assigned to Miti)
+   - In TaskModal, check "Setup S3 bucket" under Dependencies
+   - Save task
+3. **Blocked State**: "Build S3 integration" shows as 🔒 **Blocked by 1 task**
+4. **Jason Completes**: Jason moves "Setup S3 bucket" to Review
+5. **Unblocked**: "Build S3 integration" automatically becomes unblocked
+6. **Miti Works**: Miti can now work on the integration task
 
 ## 🎯 Epic Feature
 
@@ -289,10 +332,16 @@ const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
   tags: ['bug', 'urgent'],
   epicId: 'epic-1',  // Links to epic
   assignedTo: 'Miti', // Assigned to Miti (or 'Jason', or null for unassigned)
+  dependsOn: [5, 8], // Array of task IDs this task depends on
   createdAt: '2026-02-01T10:00:00.000Z',
   updatedAt: '2026-02-03T15:30:00.000Z'
 }
 ```
+
+### Dependency Logic
+- **Blocked**: Task has dependencies AND any dependency is not in "Review" column
+- **Unblocked**: Task has no dependencies OR all dependencies are in "Review" column
+- **Circular Check**: System prevents circular dependencies (A → B → A)
 
 ## 📝 License
 
