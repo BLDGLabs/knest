@@ -151,6 +151,24 @@ function App() {
     loadData();
   }, []);
 
+  // Poll for updates every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const [loadedEpics, loadedTasks] = await Promise.all([
+          db.getAllEpics(),
+          db.getAllTasks(),
+        ]);
+        setEpics(loadedEpics);
+        setTasks(loadedTasks);
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const loadData = async () => {
     try {
       setIsLoading(true);
