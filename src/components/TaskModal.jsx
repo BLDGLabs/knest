@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
+const COLUMNS = ['Backlog', 'In Progress', 'Done'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
 const ASSIGNEES = ['Jason', 'Miti'];
 
@@ -222,7 +222,7 @@ const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDepend
                         <span className="truncate">{t.title}</span>
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${
-                        t.column === 'Review' 
+                        t.column === 'Done' 
                           ? 'bg-green-600/20 text-green-400' 
                           : 'bg-gray-600/20 text-gray-400'
                       }`}>
