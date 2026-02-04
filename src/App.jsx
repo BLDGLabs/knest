@@ -141,7 +141,7 @@ function App() {
   const [error, setError] = useState(null);
   const [mobileColumnIndex, setMobileColumnIndex] = useState(0); // Start on Backlog
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
+  const [showAllDone, setShowAllDone] = useState(false); // Toggle for Done column filter
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -462,6 +462,15 @@ function App() {
       }
     }
     
+    // Filter Done column to only show tasks completed within last 24 hours (unless showAllDone)
+    if (column === 'Done' && !showAllDone) {
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      filteredTasks = filteredTasks.filter(task => {
+        const completedAt = new Date(task.updatedAt || task.createdAt).getTime();
+        return completedAt > oneDayAgo;
+      });
+    }
+    
     // Sort by createdAt descending (newest first)
     filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
@@ -685,6 +694,9 @@ function App() {
                       allTasks={tasks}
                       isTaskBlocked={isTaskBlocked}
                       getBlockingTasks={getBlockingTasks}
+                      showAllDone={showAllDone}
+                      onToggleShowAllDone={column === 'Done' ? () => setShowAllDone(!showAllDone) : undefined}
+                      totalDoneCount={column === 'Done' ? tasks.filter(t => t.column === 'Done').length : undefined}
                     />
                   ))}
                 </div>
@@ -704,6 +716,9 @@ function App() {
                     allTasks={tasks}
                     isTaskBlocked={isTaskBlocked}
                     getBlockingTasks={getBlockingTasks}
+                    showAllDone={showAllDone}
+                    onToggleShowAllDone={COLUMNS[mobileColumnIndex] === 'Done' ? () => setShowAllDone(!showAllDone) : undefined}
+                    totalDoneCount={COLUMNS[mobileColumnIndex] === 'Done' ? tasks.filter(t => t.column === 'Done').length : undefined}
                   />
                   
                   {/* Mobile swipe hint / navigation */}

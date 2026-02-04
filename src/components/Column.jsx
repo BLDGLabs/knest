@@ -3,14 +3,32 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
 
-const Column = ({ id, title, tasks, onEditTask, onDeleteTask, onCompleteTask, onQuickViewTask, epics, allTasks, isTaskBlocked, getBlockingTasks }) => {
+const Column = ({ id, title, tasks, onEditTask, onDeleteTask, onCompleteTask, onQuickViewTask, epics, allTasks, isTaskBlocked, getBlockingTasks, showAllDone, onToggleShowAllDone, totalDoneCount }) => {
   const { setNodeRef } = useDroppable({ id });
 
   return (
     <div className="flex flex-col h-full">
       <div className="bg-dark-card border border-dark-border/50 rounded-t-xl p-4 shadow-md">
-        <h2 className="font-semibold text-lg text-white">{title}</h2>
-        <span className="text-sm text-gray-400">{tasks.length} tasks</span>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-lg text-white">{title}</h2>
+            <span className="text-sm text-gray-400">
+              {tasks.length} {title === 'Done' && !showAllDone && totalDoneCount > tasks.length ? `of ${totalDoneCount} ` : ''}tasks
+            </span>
+          </div>
+          {title === 'Done' && onToggleShowAllDone && (
+            <button
+              onClick={onToggleShowAllDone}
+              className={`text-xs px-2 py-1 rounded-md transition-colors ${
+                showAllDone 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-dark-hover text-gray-400 hover:text-white'
+              }`}
+            >
+              {showAllDone ? 'Recent' : 'Show All'}
+            </button>
+          )}
+        </div>
       </div>
       
       <div
