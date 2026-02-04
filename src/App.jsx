@@ -10,6 +10,72 @@ import './App.css';
 
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
 
+const SAMPLE_TASKS = [
+  {
+    id: 1,
+    title: 'Daily standup meeting',
+    description: 'Team sync at 10 AM',
+    column: 'Recurring',
+    tags: ['feature'],
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 2,
+    title: 'Review pull requests',
+    description: 'Check team PRs and provide feedback',
+    column: 'Recurring',
+    tags: ['improvement'],
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 7200000).toISOString(),
+  },
+  {
+    id: 3,
+    title: 'Fix authentication bug',
+    description: 'Users reporting login issues on mobile',
+    column: 'In Progress',
+    tags: ['bug', 'urgent'],
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 1800000).toISOString(),
+  },
+  {
+    id: 4,
+    title: 'Design new dashboard layout',
+    description: 'Create mockups for the analytics dashboard',
+    column: 'Backlog',
+    tags: ['feature'],
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: 5,
+    title: 'Update API documentation',
+    description: 'Add examples for new endpoints',
+    column: 'Review',
+    tags: ['documentation'],
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 6,
+    title: 'Optimize database queries',
+    description: 'Improve performance on user dashboard',
+    column: 'Backlog',
+    tags: ['improvement'],
+    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+  },
+  {
+    id: 7,
+    title: 'Implement dark mode toggle',
+    description: 'Add user preference for theme switching',
+    column: 'In Progress',
+    tags: ['feature'],
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 900000).toISOString(),
+  },
+];
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -32,7 +98,18 @@ function App() {
     
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));
+    } else {
+      // Initialize with sample data on first load
+      setTasks(SAMPLE_TASKS);
+      const welcomeActivity = {
+        id: Date.now(),
+        type: 'created',
+        taskTitle: 'Welcome to Mission Control! 🚀',
+        timestamp: new Date().toISOString(),
+      };
+      setActivities([welcomeActivity]);
     }
+    
     if (savedActivities) {
       setActivities(JSON.parse(savedActivities));
     }
@@ -40,8 +117,10 @@ function App() {
 
   // Save to localStorage
   useEffect(() => {
-    if (tasks.length > 0 || activities.length > 0) {
+    if (tasks.length > 0) {
       localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+    }
+    if (activities.length > 0) {
       localStorage.setItem('kanban-activities', JSON.stringify(activities));
     }
   }, [tasks, activities]);
@@ -139,13 +218,18 @@ function App() {
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Mission Control</h1>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Mission Control
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Your tasks, organized and tracked</p>
+          </div>
           <button
             onClick={() => {
               setEditingTask(null);
               setIsModalOpen(true);
             }}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20"
           >
             + New Task
           </button>
