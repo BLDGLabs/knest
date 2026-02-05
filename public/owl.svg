@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Owl body -->
+  <ellipse cx="32" cy="38" rx="20" ry="22" fill="#8B7355"/>
+  
+  <!-- Owl head -->
+  <circle cx="32" cy="22" r="18" fill="#A0826D"/>
+  
+  <!-- Left ear tuft -->
+  <path d="M 18 10 L 16 4 L 20 8 Z" fill="#8B7355"/>
+  
+  <!-- Right ear tuft -->
+  <path d="M 46 10 L 48 4 L 44 8 Z" fill="#8B7355"/>
+  
+  <!-- Left eye background -->
+  <circle cx="24" cy="22" r="7" fill="#F5F5DC"/>
+  
+  <!-- Right eye background -->
+  <circle cx="40" cy="22" r="7" fill="#F5F5DC"/>
+  
+  <!-- Left pupil -->
+  <circle cx="24" cy="22" r="4" fill="#2C1810"/>
+  
+  <!-- Right pupil -->
+  <circle cx="40" cy="22" r="4" fill="#2C1810"/>
+  
+  <!-- Left eye shine -->
+  <circle cx="25" cy="20" r="1.5" fill="#FFFFFF"/>
+  
+  <!-- Right eye shine -->
+  <circle cx="41" cy="20" r="1.5" fill="#FFFFFF"/>
+  
+  <!-- Beak -->
+  <path d="M 32 28 L 28 32 L 32 34 L 36 32 Z" fill="#FFB347"/>
+  
+  <!-- Left wing -->
+  <ellipse cx="16" cy="42" rx="6" ry="12" fill="#6D5843" transform="rotate(-15 16 42)"/>
+  
+  <!-- Right wing -->
+  <ellipse cx="48" cy="42" rx="6" ry="12" fill="#6D5843" transform="rotate(15 48 42)"/>
+  
+  <!-- Chest feathers -->
+  <ellipse cx="32" cy="44" rx="10" ry="14" fill="#D4A574"/>
+</svg>
