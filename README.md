@@ -1,19 +1,36 @@
-# Mission Control - Kanban Task Board
+# Knest - Task Management System
 
-A modern, dark-themed Kanban task board built with React and AWS DynamoDB, featuring drag-and-drop functionality, Epic-based filtering, activity tracking, and a sleek UI inspired by mission control interfaces.
+A modern, dark-themed task management system built with React and AWS DynamoDB, featuring dual views (Kanban board & prioritized list), drag-and-drop functionality, Epic-based filtering, due dates, priority management, and a sleek UI inspired by mission control interfaces.
 
-![Mission Control Kanban Board](https://img.shields.io/badge/React-v18-blue) ![Vite](https://img.shields.io/badge/Vite-v6-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3-38BDF8) ![DynamoDB](https://img.shields.io/badge/DynamoDB-AWS-orange)
+![Knest Task Manager](https://img.shields.io/badge/React-v18-blue) ![Vite](https://img.shields.io/badge/Vite-v7-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8) ![DynamoDB](https://img.shields.io/badge/DynamoDB-AWS-orange)
 
 ## ✨ Features
 
+### Dual View System
+- **📋 List View** - NEW! Prioritized task list with smart filtering and sorting
+  - Priority-based sorting (Urgent → High → Medium → Low)
+  - Due date tracking with visual overdue indicators
+  - Filter by Today, Upcoming, Overdue
+  - Quick-complete checkbox interface
+  - Auto-prioritization based on due dates
+- **📊 Board View** - Classic Kanban board with drag-and-drop
+  - Three columns: Backlog, In Progress, Done
+  - Drag tasks between columns
+  - Visual cards with full task details
+
+### Task Management
+- **📅 Due Dates** - Set deadlines and track progress
+- **🚨 Priority Levels** - 5 priority tiers (Urgent, High, Medium, Low, None)
 - **🎯 Epic Management** - Organize tasks into Epics (large initiatives) with color-coded indicators
 - **🔍 Epic Filtering** - Filter the entire board by Epic to focus on specific work streams
 - **👤 Assignee System** - Assign tasks to Jason, Miti, or leave Unassigned
 - **🎨 Assignee Filtering** - Filter board by assignee to see "My Tasks" or team member tasks
 - **🔗 Task Dependencies** - Create dependency chains with visual blocked indicators
 - **🔒 Dependency Blocking** - Tasks show "blocked" status when dependencies are incomplete
+
+### Technical Features
 - **☁️ DynamoDB Backend** - Cloud-persisted data with AWS DynamoDB single-table design
-- **🔄 Drag & Drop** - Intuitive task management with @dnd-kit
+- **🔄 Drag & Drop** - Intuitive task management with @dnd-kit (Board view)
 - **🏷️ Color-Coded Tags** - Organize tasks with bug, feature, improvement, urgent, and documentation labels
 - **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate
 - **📋 Activity Feed** - Real-time sidebar showing recent actions
@@ -176,6 +193,41 @@ mission-control-kanban/
 
 ## 🎯 Usage
 
+### Switching Between Views
+
+#### Board View (Kanban)
+- Click the **Board icon** (columns) in the header
+- Drag and drop tasks between columns
+- Visual columns: Backlog, In Progress, Done
+- Great for team workflow visualization
+
+#### List View (Prioritized To-Do)
+- Click the **List icon** (lines) in the header
+- Tasks displayed in priority order
+- **Filters:**
+  - All - Show all active tasks
+  - Today - Tasks due today
+  - Upcoming - Tasks due within 7 days
+  - Overdue - Past-due tasks
+- **Sorting:**
+  - By Priority (default) - Urgent tasks first
+  - By Due Date - Earliest deadlines first
+  - By Created - Newest tasks first
+- **Quick Actions:**
+  - Click ○ to mark complete (moves to Done)
+  - Click ✓ to reopen completed task
+  - Click task card to view full details
+
+#### Task Priority System
+Tasks are automatically prioritized based on due dates:
+- **Urgent** (Red) - Overdue or due today/tomorrow
+- **High** (Orange) - Due within 3 days
+- **Medium** (Yellow) - Due within 7 days
+- **Low** (Blue) - Manually set
+- **None** (Gray) - No due date or explicit priority
+
+You can also set explicit priority when creating/editing a task.
+
 ### Managing Epics
 
 #### Creating an Epic
@@ -203,11 +255,13 @@ mission-control-kanban/
 #### Creating Tasks
 1. Click "+ New Task" button
 2. Fill in title, description, select column
-3. Select an Epic from the dropdown (optional)
-4. Select assignee (Miti, Jason, or Unassigned)
-5. Select dependencies (if any)
-6. Add tags
-7. Click "Create Task" (saved to DynamoDB)
+3. **Set due date** (optional) - Click calendar picker
+4. **Set priority** (optional) - Choose from dropdown (Urgent/High/Medium/Low/None)
+5. Select an Epic from the dropdown (optional)
+6. Select assignee (Miti, Jason, or Unassigned)
+7. Select dependencies (if any)
+8. Add tags
+9. Click "Create Task" (saved to DynamoDB)
 
 #### Task Operations
 - **Drag & Drop**: Click and drag tasks between columns (updates DynamoDB)

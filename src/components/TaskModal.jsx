@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 const COLUMNS = ['Backlog', 'In Progress', 'Done'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
 const ASSIGNEES = ['Jason', 'Miti'];
+const PRIORITY_LEVELS = ['urgent', 'high', 'medium', 'low', 'none'];
 
 const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDependency }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDepend
     epicId: null,
     assignedTo: null,
     dependsOn: [],
+    dueDate: '',
+    priority: 'none',
   });
 
   useEffect(() => {
@@ -25,6 +28,8 @@ const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDepend
         epicId: task.epicId || null,
         assignedTo: task.assignedTo || null,
         dependsOn: task.dependsOn || [],
+        dueDate: task.dueDate || '',
+        priority: task.priority || 'none',
       });
     }
   }, [task]);
@@ -103,6 +108,33 @@ const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDepend
               className="w-full bg-dark-hover border border-dark-border rounded-lg px-4 py-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] md:min-h-[100px] text-base"
               placeholder="Enter task description..."
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-2">Due Date</label>
+              <input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                className="w-full bg-dark-hover border border-dark-border rounded-lg px-3 py-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Priority</label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+                className="w-full bg-dark-hover border border-dark-border rounded-lg px-3 py-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+              >
+                {PRIORITY_LEVELS.map(priority => (
+                  <option key={priority} value={priority}>
+                    {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

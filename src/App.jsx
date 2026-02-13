@@ -9,6 +9,7 @@ import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
 import MitiStatusWidget from './components/MitiStatusWidget';
+import TaskListView from './components/TaskListView';
 import * as db from './services/dynamodb';
 import './App.css';
 
@@ -142,6 +143,7 @@ function App() {
   const [mobileColumnIndex, setMobileColumnIndex] = useState(0); // Start on Backlog
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showAllDone, setShowAllDone] = useState(false); // Toggle for Done column filter
+  const [viewMode, setViewMode] = useState('board'); // 'board' or 'list'
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -646,6 +648,36 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex bg-dark-card rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setViewMode('board')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'board'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  title="Board view"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  title="List view"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+              
               {/* Miti Status Widget */}
               <div className="hidden sm:block">
                 <MitiStatusWidget />
@@ -663,8 +695,8 @@ function App() {
             </div>
           </div>
 
-          {/* Stats Bar */}
-          <StatsBar tasks={getFilteredTasks()} />
+          {/* Stats Bar - only show in board view */}
+          {viewMode === 'board' && <StatsBar tasks={getFilteredTasks()} />}
 
           {/* Mobile Column Selector */}
           <div className="flex md:hidden gap-1 mt-4 mb-3 overflow-x-auto pb-2 -mx-3 px-3">
@@ -684,8 +716,17 @@ function App() {
           </div>
 
           <div className="flex-1 mt-4 md:mt-6">
-            {/* Main Board */}
-            <div className="w-full">
+            {/* Conditional View Rendering */}
+            {viewMode === 'list' ? (
+              <TaskListView
+                tasks={tasks}
+                epics={epics}
+                onTaskClick={handleQuickViewTask}
+                onTaskUpdate={handleUpdateTask}
+              />
+            ) : (
+              /* Main Board */
+              <div className="w-full">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -782,6 +823,7 @@ function App() {
                 </DragOverlay>
               </DndContext>
             </div>
+            )}
           </div>
         </div>
       </div>

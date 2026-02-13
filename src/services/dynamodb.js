@@ -153,6 +153,8 @@ export async function createTask(task) {
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
     completedAt: task.completedAt || null,
+    dueDate: task.dueDate || null,
+    priority: task.priority || 'none',
   };
 
   await docClient.send(new PutCommand({
