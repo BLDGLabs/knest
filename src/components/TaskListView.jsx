@@ -248,13 +248,13 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
 
                     {/* Task title */}
                     <div className="flex-1 min-w-0">
-                      <span className={`text-sm ${task.column === 'Done' ? 'line-through text-gray-500' : 'text-white'} truncate block`}>
+                      <span className={`text-base ${task.column === 'Done' ? 'line-through text-gray-500' : 'text-gray-100'} truncate block`}>
                         {task.title}
                       </span>
                     </div>
 
                     {/* Compact metadata */}
-                    <div className="flex items-center gap-3 flex-shrink-0 text-xs text-gray-400">
+                    <div className="flex items-center gap-3 flex-shrink-0 text-sm text-gray-300">
                       {/* Due date */}
                       {task.dueDate && (
                         <div className={`flex items-center gap-1 ${overdue ? 'text-red-500 font-medium' : ''}`}>
