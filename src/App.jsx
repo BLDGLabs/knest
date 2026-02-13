@@ -722,7 +722,23 @@ function App() {
                 tasks={tasks}
                 epics={epics}
                 onTaskClick={handleQuickViewTask}
-                onTaskUpdate={handleUpdateTask}
+                onTaskUpdate={async (taskId, updates) => {
+                  try {
+                    const updatedTask = await db.updateTask(taskId, updates);
+                    setTasks(prevTasks =>
+                      prevTasks.map(task =>
+                        task.id === taskId ? updatedTask : task
+                      )
+                    );
+                    if (updates.column === 'Done') {
+                      addActivity('completed', updatedTask.title);
+                    } else if (updates.column) {
+                      addActivity('moved', updatedTask.title, null, updates.column);
+                    }
+                  } catch (err) {
+                    console.error('Error updating task:', err);
+                  }
+                }}
               />
             ) : (
               /* Main Board */

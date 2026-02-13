@@ -141,16 +141,16 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
   const filteredAndSorted = sortTasks(filterTasks(tasks));
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-dark-bg">
       {/* Header with filters and sort */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-dark-card border-b border-dark-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">Tasks</h2>
+          <h2 className="text-2xl font-bold text-white">Tasks</h2>
           <div className="flex gap-2">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 bg-dark-hover border border-dark-border rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="priority">Sort by Priority</option>
               <option value="dueDate">Sort by Due Date</option>
@@ -164,8 +164,8 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'all'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white'
+                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
             All
@@ -174,8 +174,8 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
             onClick={() => setFilter('today')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'today'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white'
+                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
             Today
@@ -184,8 +184,8 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
             onClick={() => setFilter('upcoming')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'upcoming'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white'
+                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
             Upcoming
@@ -194,8 +194,8 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
             onClick={() => setFilter('overdue')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'overdue'
-                ? 'bg-red-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-red-600 text-white'
+                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
             Overdue
@@ -206,7 +206,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
       {/* Task list */}
       <div className="flex-1 overflow-y-auto p-4">
         {filteredAndSorted.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-gray-400">
             <div className="text-center">
               <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <p className="text-lg">No tasks to show</p>
@@ -224,7 +224,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
               return (
                 <div
                   key={task.id}
-                  className={`bg-white rounded-lg border-l-4 ${priorityConfig.color} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+                  className={`bg-dark-card rounded-lg border-l-4 ${priorityConfig.color} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
                   onClick={() => onTaskClick(task)}
                 >
                   <div className="p-4">
@@ -246,12 +246,12 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
 
                       {/* Task content */}
                       <div className="flex-1 min-w-0">
-                        <h3 className={`font-medium text-gray-900 ${task.column === 'Done' ? 'line-through text-gray-500' : ''}`}>
+                        <h3 className={`font-medium text-white ${task.column === 'Done' ? 'line-through text-gray-500' : ''}`}>
                           {task.title}
                         </h3>
                         
                         {task.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          <p className="text-sm text-gray-400 mt-1 line-clamp-2">
                             {task.description}
                           </p>
                         )}
@@ -268,7 +268,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
 
                           {/* Due date */}
                           {task.dueDate && (
-                            <div className={`flex items-center gap-1 ${overdue ? 'text-red-600' : 'text-gray-600'}`}>
+                            <div className={`flex items-center gap-1 ${overdue ? 'text-red-500' : 'text-gray-400'}`}>
                               {overdue ? (
                                 <AlertCircle className="w-4 h-4" />
                               ) : (
@@ -282,7 +282,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
 
                           {/* Assignee */}
                           {task.assignedTo && (
-                            <div className="flex items-center gap-1 text-gray-600">
+                            <div className="flex items-center gap-1 text-gray-400">
                               <User className="w-4 h-4" />
                               <span>{task.assignedTo}</span>
                             </div>
@@ -295,12 +295,12 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: epic.color }}
                               />
-                              <span className="text-gray-600">{epic.name}</span>
+                              <span className="text-gray-400">{epic.name}</span>
                             </div>
                           )}
 
                           {/* Status */}
-                          <div className="flex items-center gap-1 text-gray-500">
+                          <div className="flex items-center gap-1 text-gray-400">
                             <Clock className="w-4 h-4" />
                             <span className="text-xs">{task.column}</span>
                           </div>
@@ -312,7 +312,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
                             {task.tags.map(tag => (
                               <span
                                 key={tag}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-dark-hover text-gray-300 rounded text-xs"
                               >
                                 <Tag className="w-3 h-3" />
                                 {tag}
