@@ -214,7 +214,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {filteredAndSorted.map(task => {
               const priority = getTaskPriority(task);
               const priorityConfig = PRIORITY_LEVELS[priority];
@@ -224,103 +224,60 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
               return (
                 <div
                   key={task.id}
-                  className={`bg-dark-card rounded-lg border-l-4 ${priorityConfig.color} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+                  className={`bg-dark-card rounded border-l-4 ${priorityConfig.color} hover:bg-dark-hover transition-colors cursor-pointer`}
                   onClick={() => onTaskClick(task)}
                 >
-                  <div className="p-4">
-                    <div className="flex items-start gap-3">
-                      {/* Checkbox */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleComplete(task);
-                        }}
-                        className="mt-1 flex-shrink-0"
-                      >
-                        {task.column === 'Done' ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        ) : (
-                          <Circle className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                        )}
-                      </button>
+                  <div className="px-3 py-2 flex items-center gap-3">
+                    {/* Checkbox */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleComplete(task);
+                      }}
+                      className="flex-shrink-0"
+                    >
+                      {task.column === 'Done' ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-gray-400 hover:text-gray-300" />
+                      )}
+                    </button>
 
-                      {/* Task content */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className={`font-medium text-white ${task.column === 'Done' ? 'line-through text-gray-500' : ''}`}>
-                          {task.title}
-                        </h3>
-                        
-                        {task.description && (
-                          <p className="text-sm text-gray-400 mt-1 line-clamp-2">
-                            {task.description}
-                          </p>
-                        )}
+                    {/* Priority dot */}
+                    <div className={`w-2 h-2 rounded-full ${priorityConfig.color} flex-shrink-0`} title={priorityConfig.label} />
 
-                        {/* Metadata row */}
-                        <div className="flex items-center gap-4 mt-3 text-sm">
-                          {/* Priority badge */}
-                          <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${priorityConfig.bgLight}`}>
-                            <Flag className={`w-3 h-3 ${priorityConfig.textColor}`} />
-                            <span className={`text-xs font-medium ${priorityConfig.textColor}`}>
-                              {priorityConfig.label}
-                            </span>
-                          </div>
+                    {/* Task title */}
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-sm ${task.column === 'Done' ? 'line-through text-gray-500' : 'text-white'} truncate block`}>
+                        {task.title}
+                      </span>
+                    </div>
 
-                          {/* Due date */}
-                          {task.dueDate && (
-                            <div className={`flex items-center gap-1 ${overdue ? 'text-red-500' : 'text-gray-400'}`}>
-                              {overdue ? (
-                                <AlertCircle className="w-4 h-4" />
-                              ) : (
-                                <Calendar className="w-4 h-4" />
-                              )}
-                              <span className={overdue ? 'font-medium' : ''}>
-                                {formatDueDate(task.dueDate)}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Assignee */}
-                          {task.assignedTo && (
-                            <div className="flex items-center gap-1 text-gray-400">
-                              <User className="w-4 h-4" />
-                              <span>{task.assignedTo}</span>
-                            </div>
-                          )}
-
-                          {/* Epic */}
-                          {epic && (
-                            <div className="flex items-center gap-1">
-                              <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: epic.color }}
-                              />
-                              <span className="text-gray-400">{epic.name}</span>
-                            </div>
-                          )}
-
-                          {/* Status */}
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-xs">{task.column}</span>
-                          </div>
+                    {/* Compact metadata */}
+                    <div className="flex items-center gap-3 flex-shrink-0 text-xs text-gray-400">
+                      {/* Due date */}
+                      {task.dueDate && (
+                        <div className={`flex items-center gap-1 ${overdue ? 'text-red-500 font-medium' : ''}`}>
+                          {overdue && <AlertCircle className="w-3 h-3" />}
+                          <span>{formatDueDate(task.dueDate)}</span>
                         </div>
+                      )}
 
-                        {/* Tags */}
-                        {task.tags && task.tags.length > 0 && (
-                          <div className="flex items-center gap-2 mt-2">
-                            {task.tags.map(tag => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-dark-hover text-gray-300 rounded text-xs"
-                              >
-                                <Tag className="w-3 h-3" />
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      {/* Assignee initial */}
+                      {task.assignedTo && (
+                        <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium" title={task.assignedTo}>
+                          {task.assignedTo.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      {/* Epic dot */}
+                      {epic && (
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: epic.color }}
+                          title={epic.name}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
