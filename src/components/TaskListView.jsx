@@ -224,7 +224,7 @@ const TaskListView = ({ tasks, epics, onTaskClick, onTaskUpdate }) => {
               return (
                 <div
                   key={task.id}
-                  className={`bg-dark-card rounded border-l-4 ${priorityConfig.color} hover:bg-dark-hover transition-colors cursor-pointer`}
+                  className={`bg-dark-bg/50 rounded border-l-2 ${priorityConfig.color} hover:bg-dark-card transition-colors cursor-pointer`}
                   onClick={() => onTaskClick(task)}
                 >
                   <div className="px-3 py-2 flex items-center gap-3">
