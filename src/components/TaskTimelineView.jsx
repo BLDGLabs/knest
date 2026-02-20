@@ -24,18 +24,19 @@ const ASSIGNEE_COLORS = {
 
 const TaskTimelineView = ({ tasks, onTaskClick }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('all');
+  const [showDone, setShowDone] = useState(false);
 
-  // Get unique assignees (excluding Done tasks)
+  // Get unique assignees (optionally excluding Done tasks)
   const assignees = useMemo(() => {
-    const activeTasks = tasks.filter(t => t.column !== 'Done');
+    const activeTasks = showDone ? tasks : tasks.filter(t => t.column !== 'Done');
     const uniqueAssignees = [...new Set(activeTasks.map(t => t.assignedTo).filter(Boolean))];
     return uniqueAssignees.sort();
-  }, [tasks]);
+  }, [tasks, showDone]);
 
   // Filter and sort tasks
   const displayedTasks = useMemo(() => {
-    // Filter out Done tasks
-    let filtered = tasks.filter(task => task.column !== 'Done');
+    // Optionally filter out Done tasks
+    let filtered = showDone ? tasks : tasks.filter(task => task.column !== 'Done');
 
     // Filter by assignee
     if (selectedAssignee !== 'all') {
@@ -48,7 +49,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
 
     // Sort by createdAt descending (newest first)
     return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [tasks, selectedAssignee]);
+  }, [tasks, selectedAssignee, showDone]);
 
   // Get assignee initials for avatar fallback
   const getInitials = (name) => {
@@ -110,8 +111,20 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
             <h2 className="text-2xl font-bold text-white">Timeline</h2>
             <p className="text-sm text-gray-400 mt-1">Tasks by creation date</p>
           </div>
-          <div className="text-sm text-gray-400">
-            {displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'}
+          <div className="flex items-center gap-4">
+            {/* Show Done toggle */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showDone}
+                onChange={(e) => setShowDone(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-600 bg-dark-hover text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <span className="text-sm text-gray-400">Show Done</span>
+            </label>
+            <div className="text-sm text-gray-400">
+              {displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'}
+            </div>
           </div>
         </div>
 
@@ -125,7 +138,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                 : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
-            All ({tasks.filter(t => t.column !== 'Done').length})
+            All ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).length})
           </button>
           <button
             onClick={() => setSelectedAssignee('unassigned')}
@@ -135,7 +148,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                 : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
-            Unassigned ({tasks.filter(t => t.column !== 'Done' && (!t.assignedTo || t.assignedTo === 'Unassigned')).length})
+            Unassigned ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => !t.assignedTo || t.assignedTo === 'Unassigned').length})
           </button>
           {assignees.map(assignee => (
             <button
@@ -172,7 +185,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                   {getInitials(assignee)}
                 </span>
               </div>
-              {assignee} ({tasks.filter(t => t.column !== 'Done' && t.assignedTo === assignee).length})
+              {assignee} ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => t.assignedTo === assignee).length})
             </button>
           ))}
         </div>
