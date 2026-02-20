@@ -9,7 +9,6 @@ import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
 import MitiStatusWidget from './components/MitiStatusWidget';
-import TaskListView from './components/TaskListView';
 import TaskTimelineView from './components/TaskTimelineView';
 import * as db from './services/dynamodb';
 import './App.css';
@@ -151,7 +150,7 @@ function App() {
   const [mobileColumnIndex, setMobileColumnIndex] = useState(0); // Start on Backlog
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showAllDone, setShowAllDone] = useState(false); // Toggle for Done column filter
-  const [viewMode, setViewMode] = useState('board'); // 'board' or 'list'
+  const [viewMode, setViewMode] = useState('timeline'); // 'board' or 'timeline'
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -672,19 +671,6 @@ function App() {
                   </svg>
                 </button>
                 <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                  title="List view"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
-                <button
                   onClick={() => setViewMode('timeline')}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                     viewMode === 'timeline'
@@ -742,29 +728,6 @@ function App() {
               <TaskTimelineView
                 tasks={tasks}
                 onTaskClick={handleQuickViewTask}
-              />
-            ) : viewMode === 'list' ? (
-              <TaskListView
-                tasks={tasks}
-                epics={epics}
-                onTaskClick={handleQuickViewTask}
-                onTaskUpdate={async (taskId, updates) => {
-                  try {
-                    const updatedTask = await db.updateTask(taskId, updates);
-                    setTasks(prevTasks =>
-                      prevTasks.map(task =>
-                        task.id === taskId ? updatedTask : task
-                      )
-                    );
-                    if (updates.column === 'Done') {
-                      addActivity('completed', updatedTask.title);
-                    } else if (updates.column) {
-                      addActivity('moved', updatedTask.title, null, updates.column);
-                    }
-                  } catch (err) {
-                    console.error('Error updating task:', err);
-                  }
-                }}
               />
             ) : (
               /* Main Board */
