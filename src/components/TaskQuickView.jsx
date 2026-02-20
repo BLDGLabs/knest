@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SourceIcon from './SourceIcon';
 
 const TAG_COLORS = {
   bug: 'bg-red-500/20 text-red-400 border-red-500/30',
@@ -20,14 +21,6 @@ const ASSIGNEE_AVATARS = {
   'miti': '/avatars/miti.png',
   'Jason': '/avatars/jason.png',
   'jason': '/avatars/jason.png',
-};
-
-const SOURCE_ICONS = {
-  'manual': '✏️',
-  'slack': '💬',
-  'jira': '🎫',
-  'github': '🐙',
-  'email': '📧',
 };
 
 const SOURCE_LABELS = {
@@ -177,7 +170,7 @@ const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit, onDelete }) => {
                 Source
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-xl">{SOURCE_ICONS[task.source]}</span>
+                <SourceIcon source={task.source} size="lg" />
                 <span className="text-white font-medium">{SOURCE_LABELS[task.source]}</span>
               </div>
             </div>

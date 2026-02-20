@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import SourceIcon from './SourceIcon';
 
 const COLUMNS = ['Backlog', 'In Progress', 'Done'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
 const ASSIGNEES = ['Jason', 'Miti'];
 const PRIORITY_LEVELS = ['urgent', 'high', 'medium', 'low', 'none'];
 const SOURCES = [
-  { value: 'manual', label: 'Manual', icon: '✏️' },
-  { value: 'slack', label: 'Slack', icon: '💬' },
-  { value: 'jira', label: 'Jira', icon: '🎫' },
-  { value: 'github', label: 'GitHub', icon: '🐙' },
-  { value: 'email', label: 'Email', icon: '📧' },
+  { value: 'manual', label: 'Manual' },
+  { value: 'slack', label: 'Slack' },
+  { value: 'jira', label: 'Jira' },
+  { value: 'github', label: 'GitHub' },
+  { value: 'email', label: 'Email' },
 ];
 
 const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDependency }) => {
@@ -224,7 +225,7 @@ const TaskModal = ({ task, epics, allTasks, onSave, onClose, checkCircularDepend
                       : 'bg-dark-hover border-dark-border text-gray-400 hover:border-gray-600'
                   }`}
                 >
-                  <span>{source.icon}</span>
+                  <SourceIcon source={source.value} size="sm" />
                   <span>{source.label}</span>
                 </button>
               ))}

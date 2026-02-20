@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 
 // Avatar images - stored in public/avatars/
 const ASSIGNEE_AVATARS = {
@@ -22,33 +22,7 @@ const ASSIGNEE_COLORS = {
   'jason': 'bg-blue-500/20 border-blue-500/40',
 };
 
-const SOURCE_ICONS = {
-  'manual': '✏️',
-  'slack': '💬',
-  'jira': '🎫',
-  'github': '🐙',
-  'email': '📧',
-};
-
-const TaskTimelineView = ({ tasks, onTaskClick }) => {
-  const [selectedAssignee, setSelectedAssignee] = useState('all');
-  const [selectedSource, setSelectedSource] = useState('all');
-  const [showDone, setShowDone] = useState(false);
-
-  // Get unique assignees (optionally excluding Done tasks)
-  const assignees = useMemo(() => {
-    const activeTasks = showDone ? tasks : tasks.filter(t => t.column !== 'Done');
-    const uniqueAssignees = [...new Set(activeTasks.map(t => t.assignedTo).filter(Boolean))];
-    return uniqueAssignees.sort();
-  }, [tasks, showDone]);
-
-  // Get unique sources
-  const sources = useMemo(() => {
-    const activeTasks = showDone ? tasks : tasks.filter(t => t.column !== 'Done');
-    const uniqueSources = [...new Set(activeTasks.map(t => t.source).filter(Boolean))];
-    return uniqueSources.sort();
-  }, [tasks, showDone]);
-
+const TaskTimelineView = ({ tasks, onTaskClick, selectedAssignee, selectedSource, showDone }) => {
   // Filter and sort tasks
   const displayedTasks = useMemo(() => {
     // Optionally filter out Done tasks
@@ -125,117 +99,16 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
 
   return (
     <div className="h-full flex flex-col bg-dark-bg">
-      {/* Header with assignee filter */}
+      {/* Simple Header */}
       <div className="bg-dark-card border-b border-dark-border p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Timeline</h2>
             <p className="text-sm text-gray-400 mt-1">Tasks by creation date</p>
           </div>
-          <div className="flex items-center gap-4">
-            {/* Show Done toggle */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showDone}
-                onChange={(e) => setShowDone(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-600 bg-dark-hover text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
-              />
-              <span className="text-sm text-gray-400">Show Done</span>
-            </label>
-            <div className="text-sm text-gray-400">
-              {displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'}
-            </div>
+          <div className="text-sm text-gray-400">
+            {displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'}
           </div>
-        </div>
-
-        {/* Assignee filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mb-2">
-          <button
-            onClick={() => setSelectedAssignee('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedAssignee === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
-            }`}
-          >
-            All ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).length})
-          </button>
-          <button
-            onClick={() => setSelectedAssignee('unassigned')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedAssignee === 'unassigned'
-                ? 'bg-blue-600 text-white'
-                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
-            }`}
-          >
-            Unassigned ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => !t.assignedTo || t.assignedTo === 'Unassigned').length})
-          </button>
-          {assignees.map(assignee => (
-            <button
-              key={assignee}
-              onClick={() => setSelectedAssignee(assignee)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
-                selectedAssignee === assignee
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
-              }`}
-            >
-              <div 
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold border overflow-hidden ${
-                  ASSIGNEE_COLORS[assignee] || 'bg-gray-500/20 border-gray-500/40'
-                }`}
-                style={{ 
-                  backgroundColor: assignee && !ASSIGNEE_COLORS[assignee] ? getAssigneeColor(assignee) : undefined 
-                }}
-              >
-                {ASSIGNEE_AVATARS[assignee] ? (
-                  <img 
-                    src={ASSIGNEE_AVATARS[assignee]} 
-                    alt={assignee}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <span 
-                  className={`${ASSIGNEE_AVATARS[assignee] ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}
-                >
-                  {getInitials(assignee)}
-                </span>
-              </div>
-              {assignee} ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => t.assignedTo === assignee).length})
-            </button>
-          ))}
-        </div>
-
-        {/* Source filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 mt-2">
-          <button
-            onClick={() => setSelectedSource('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedSource === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
-            }`}
-          >
-            All Sources
-          </button>
-          {sources.map(source => (
-            <button
-              key={source}
-              onClick={() => setSelectedSource(source)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                selectedSource === source
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
-              }`}
-            >
-              {source.charAt(0).toUpperCase() + source.slice(1)} ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => t.source === source).length})
-            </button>
-          ))}
         </div>
       </div>
 
@@ -299,14 +172,14 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                   </div>
 
                   {/* Source column */}
-                  <span className="text-sm text-gray-400 min-w-[100px] text-center">
+                  <span className="text-sm text-gray-400 w-24 text-center flex-shrink-0">
                     {task.source ? task.source.charAt(0).toUpperCase() + task.source.slice(1) : 'Manual'}
                   </span>
 
-                  {/* Date + status badge */}
+                  {/* Status and date columns - fixed widths */}
                   <div className="flex items-center gap-3 flex-shrink-0">
                     {/* Status badge */}
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    <span className={`w-28 px-2 py-1 rounded text-xs font-medium text-center ${
                       task.column === 'Done' 
                         ? 'bg-green-500/20 text-green-400'
                         : task.column === 'In Progress'
@@ -317,7 +190,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                     </span>
 
                     {/* Created date */}
-                    <span className="text-sm text-gray-400 tabular-nums min-w-[80px] text-right">
+                    <span className="text-sm text-gray-400 tabular-nums w-20 text-right">
                       {formatDate(task.createdAt)}
                     </span>
                   </div>

@@ -9,6 +9,7 @@ import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
 import TaskTimelineView from './components/TaskTimelineView';
+import TimelineFilterSidebar from './components/TimelineFilterSidebar';
 import TrashView from './components/TrashView';
 import * as db from './services/dynamodb';
 import './App.css';
@@ -152,6 +153,12 @@ function App() {
   const [showAllDone, setShowAllDone] = useState(false); // Toggle for Done column filter
   const [viewMode, setViewMode] = useState('timeline'); // 'board' or 'timeline'
   const [showTrash, setShowTrash] = useState(false); // Trash view
+  
+  // Timeline view filters
+  const [timelineSelectedAssignee, setTimelineSelectedAssignee] = useState('all');
+  const [timelineSelectedSource, setTimelineSelectedSource] = useState('all');
+  const [timelineShowDone, setTimelineShowDone] = useState(false);
+  
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -583,34 +590,49 @@ function App() {
 
   return (
     <div className="min-h-screen bg-dark-bg text-white flex">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
+      {/* Mobile Sidebar Overlay - only in board view */}
+      {viewMode === 'board' && isMobileSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/60 z-40 md:hidden"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
 
-      {/* Epic Sidebar - Hidden on mobile unless open */}
-      <div className={`${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto transition-transform duration-300`}>
-        <EpicSidebar
-          epics={epics}
-          selectedEpicId={selectedEpicId}
-          onSelectEpic={(id) => {
-            setSelectedEpicId(id);
-            setIsMobileSidebarOpen(false);
-          }}
-          selectedAssignee={selectedAssignee}
-          onSelectAssignee={(assignee) => {
-            setSelectedAssignee(assignee);
-            setIsMobileSidebarOpen(false);
-          }}
-          onCreateEpic={handleCreateEpic}
-          onEditEpic={handleEditEpic}
-          onDeleteEpic={handleDeleteEpic}
+      {/* Epic Sidebar - Hidden on mobile unless open, and hidden in timeline view */}
+      {viewMode === 'board' && (
+        <div className={`${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto transition-transform duration-300`}>
+          <EpicSidebar
+            epics={epics}
+            selectedEpicId={selectedEpicId}
+            onSelectEpic={(id) => {
+              setSelectedEpicId(id);
+              setIsMobileSidebarOpen(false);
+            }}
+            selectedAssignee={selectedAssignee}
+            onSelectAssignee={(assignee) => {
+              setSelectedAssignee(assignee);
+              setIsMobileSidebarOpen(false);
+            }}
+            onCreateEpic={handleCreateEpic}
+            onEditEpic={handleEditEpic}
+            onDeleteEpic={handleDeleteEpic}
+            tasks={tasks}
+          />
+        </div>
+      )}
+
+      {/* Timeline Filter Sidebar - only in timeline view */}
+      {viewMode === 'timeline' && (
+        <TimelineFilterSidebar
           tasks={tasks}
+          selectedAssignee={timelineSelectedAssignee}
+          onSelectAssignee={setTimelineSelectedAssignee}
+          selectedSource={timelineSelectedSource}
+          onSelectSource={setTimelineSelectedSource}
+          showDone={timelineShowDone}
+          onToggleShowDone={setTimelineShowDone}
         />
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -618,15 +640,17 @@ function App() {
           {/* Header */}
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <div className="flex items-center gap-3">
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="md:hidden p-2 hover:bg-dark-hover rounded-lg"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+              {/* Mobile menu button - only in board view */}
+              {viewMode === 'board' && (
+                <button
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="md:hidden p-2 hover:bg-dark-hover rounded-lg"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              )}
               <div>
                 <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
                   <span className="text-2xl md:text-3xl">🦉</span>
@@ -733,6 +757,9 @@ function App() {
               <TaskTimelineView
                 tasks={tasks}
                 onTaskClick={handleQuickViewTask}
+                selectedAssignee={timelineSelectedAssignee}
+                selectedSource={timelineSelectedSource}
+                showDone={timelineShowDone}
               />
             ) : (
               /* Main Board */
