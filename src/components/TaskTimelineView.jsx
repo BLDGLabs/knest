@@ -227,13 +227,12 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
             <button
               key={source}
               onClick={() => setSelectedSource(source)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 selectedSource === source
                   ? 'bg-blue-600 text-white'
                   : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
               }`}
             >
-              <span>{SOURCE_ICONS[source] || '❓'}</span>
               {source.charAt(0).toUpperCase() + source.slice(1)} ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => t.source === source).length})
             </button>
           ))}
@@ -297,12 +296,12 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                     }`}>
                       {task.title}
                     </span>
-                    {task.source && SOURCE_ICONS[task.source] && (
-                      <span className="text-xs opacity-60 flex-shrink-0 flex items-center gap-1" title={`Source: ${task.source}`}>
-                        {SOURCE_ICONS[task.source]} {task.source.charAt(0).toUpperCase() + task.source.slice(1)}
-                      </span>
-                    )}
                   </div>
+
+                  {/* Source column */}
+                  <span className="text-sm text-gray-400 min-w-[100px] text-center">
+                    {task.source ? task.source.charAt(0).toUpperCase() + task.source.slice(1) : 'Manual'}
+                  </span>
 
                   {/* Date + status badge */}
                   <div className="flex items-center gap-3 flex-shrink-0">
