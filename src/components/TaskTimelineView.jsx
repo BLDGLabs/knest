@@ -25,15 +25,17 @@ const ASSIGNEE_COLORS = {
 const TaskTimelineView = ({ tasks, onTaskClick }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('all');
 
-  // Get unique assignees
+  // Get unique assignees (excluding Done tasks)
   const assignees = useMemo(() => {
-    const uniqueAssignees = [...new Set(tasks.map(t => t.assignedTo).filter(Boolean))];
+    const activeTasks = tasks.filter(t => t.column !== 'Done');
+    const uniqueAssignees = [...new Set(activeTasks.map(t => t.assignedTo).filter(Boolean))];
     return uniqueAssignees.sort();
   }, [tasks]);
 
   // Filter and sort tasks
   const displayedTasks = useMemo(() => {
-    let filtered = tasks;
+    // Filter out Done tasks
+    let filtered = tasks.filter(task => task.column !== 'Done');
 
     // Filter by assignee
     if (selectedAssignee !== 'all') {
@@ -123,7 +125,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                 : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
-            All ({tasks.length})
+            All ({tasks.filter(t => t.column !== 'Done').length})
           </button>
           <button
             onClick={() => setSelectedAssignee('unassigned')}
@@ -133,7 +135,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                 : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
             }`}
           >
-            Unassigned ({tasks.filter(t => !t.assignedTo || t.assignedTo === 'Unassigned').length})
+            Unassigned ({tasks.filter(t => t.column !== 'Done' && (!t.assignedTo || t.assignedTo === 'Unassigned')).length})
           </button>
           {assignees.map(assignee => (
             <button
@@ -170,7 +172,7 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                   {getInitials(assignee)}
                 </span>
               </div>
-              {assignee} ({tasks.filter(t => t.assignedTo === assignee).length})
+              {assignee} ({tasks.filter(t => t.column !== 'Done' && t.assignedTo === assignee).length})
             </button>
           ))}
         </div>
