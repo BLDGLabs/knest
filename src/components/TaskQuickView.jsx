@@ -38,7 +38,7 @@ const SOURCE_LABELS = {
   'email': 'Email',
 };
 
-const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit }) => {
+const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit, onDelete }) => {
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -101,12 +101,25 @@ const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit }) => {
               </div>
             )}
           </div>
-          <button
-            onClick={onEdit}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex-shrink-0"
-          >
-            Edit
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={onEdit}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm('Delete this task?')) {
+                  onDelete(task.id);
+                  onClose();
+                }
+              }}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Delete
+            </button>
+          </div>
         </div>
 
         {/* Content */}

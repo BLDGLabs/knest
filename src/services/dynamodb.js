@@ -185,10 +185,11 @@ export async function getTask(taskId) {
 export async function getAllTasks() {
   const result = await docClient.send(new ScanCommand({
     TableName: TABLE_NAME,
-    FilterExpression: 'begins_with(PK, :prefix) AND SK = :sk',
+    FilterExpression: 'begins_with(PK, :prefix) AND SK = :sk AND (attribute_not_exists(deleted) OR deleted = :false)',
     ExpressionAttributeValues: {
       ':prefix': 'TASK#',
       ':sk': 'METADATA',
+      ':false': false,
     },
   }));
 
@@ -266,7 +267,54 @@ export async function updateTask(taskId, updates) {
 }
 
 export async function deleteTask(taskId) {
-  // Delete the task metadata
+  // Soft delete: mark as deleted with timestamp (keep existing data)
+  const task = await getTask(taskId);
+  if (!task) return;
+  
+  await docClient.send(new PutCommand({
+    TableName: TABLE_NAME,
+    Item: {
+      ...task,
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    },
+  }));
+}
+
+export async function getDeletedTasks() {
+  const result = await docClient.send(new ScanCommand({
+    TableName: TABLE_NAME,
+    FilterExpression: 'begins_with(PK, :prefix) AND SK = :sk AND deleted = :true',
+    ExpressionAttributeValues: {
+      ':prefix': 'TASK#',
+      ':sk': 'METADATA',
+      ':true': true,
+    },
+  }));
+
+  // Convert back to frontend format
+  return (result.Items || []).map(item => ({
+    ...item,
+    epicId: item.epicId === 'NONE' ? null : item.epicId,
+    assignedTo: item.assignedTo === 'UNASSIGNED' ? null : item.assignedTo,
+  }));
+}
+
+export async function undeleteTask(taskId) {
+  // Restore task by removing deleted flag
+  const task = await getTask(taskId);
+  if (!task) return;
+  
+  const { deleted, deletedAt, ...taskWithoutDeleteFlags } = task;
+  
+  await docClient.send(new PutCommand({
+    TableName: TABLE_NAME,
+    Item: taskWithoutDeleteFlags,
+  }));
+}
+
+export async function hardDeleteTask(taskId) {
+  // Permanent delete: remove the task and dependencies
   await docClient.send(new DeleteCommand({
     TableName: TABLE_NAME,
     Key: {
@@ -277,6 +325,23 @@ export async function deleteTask(taskId) {
 
   // Delete all dependency records
   await clearTaskDependencies(taskId);
+}
+
+export async function cleanupOldDeletedTasks(daysOld = 7) {
+  const deletedTasks = await getDeletedTasks();
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+  
+  const tasksToHardDelete = deletedTasks.filter(task => {
+    if (!task.deletedAt) return false;
+    return new Date(task.deletedAt) < cutoffDate;
+  });
+
+  for (const task of tasksToHardDelete) {
+    await hardDeleteTask(task.id);
+  }
+
+  return tasksToHardDelete.length;
 }
 
 // ==================== DEPENDENCIES ====================

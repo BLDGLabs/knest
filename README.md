@@ -460,6 +460,56 @@ define: {
 }
 ```
 
+## 🗑️ Trash & Data Recovery
+
+### Soft Delete System
+
+Knest uses a **soft delete** approach for safety:
+
+- Deleted tasks are moved to **Trash** (marked with `deleted: true`)
+- Tasks stay in trash for **7 days** before auto-deletion
+- View trash by clicking the 🗑️ button in the header
+
+### Restoring Tasks
+
+1. Click the 🗑️ Trash button
+2. Find the deleted task
+3. Click **Restore** to recover it
+4. Task returns to its original state
+
+### Permanent Deletion
+
+Two ways to permanently delete tasks:
+
+**Manual:**
+1. Open Trash view
+2. Click "Delete Forever" on a specific task
+3. OR click "Cleanup Old (7+ days)" to bulk-delete old tasks
+
+**Automated Cleanup:**
+Run the cleanup script manually or via cron:
+
+```bash
+# Delete tasks in trash for 7+ days (default)
+node scripts/cleanup-trash.js
+
+# Custom retention (e.g., 14 days)
+node scripts/cleanup-trash.js 14
+```
+
+**Add to cron for automatic cleanup:**
+```bash
+# Run daily at 3 AM
+0 3 * * * cd /path/to/knest && node scripts/cleanup-trash.js
+```
+
+### Safety Features
+
+- Confirmation prompts before permanent deletion
+- Visual indicators for tasks approaching auto-delete (7+ days old)
+- Trash is isolated from normal views
+- All task data preserved in trash (title, description, Epic, etc.)
+
 ## 📝 License
 
 MIT License - feel free to use this project however you'd like!

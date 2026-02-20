@@ -9,6 +9,7 @@ import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
 import TaskTimelineView from './components/TaskTimelineView';
+import TrashView from './components/TrashView';
 import * as db from './services/dynamodb';
 import './App.css';
 
@@ -150,6 +151,7 @@ function App() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showAllDone, setShowAllDone] = useState(false); // Toggle for Done column filter
   const [viewMode, setViewMode] = useState('timeline'); // 'board' or 'timeline'
+  const [showTrash, setShowTrash] = useState(false); // Trash view
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -685,6 +687,14 @@ function App() {
               </div>
               
               <button
+                onClick={() => setShowTrash(true)}
+                className="px-3 py-2 bg-dark-card hover:bg-dark-hover text-gray-400 hover:text-white rounded-lg font-medium transition-colors border border-dark-border text-sm"
+                title="View trash"
+              >
+                🗑️
+              </button>
+              
+              <button
                 onClick={() => {
                   setEditingTask(null);
                   setIsModalOpen(true);
@@ -863,6 +873,15 @@ function App() {
           allTasks={tasks}
           onClose={() => setQuickViewTask(null)}
           onEdit={handleQuickViewEdit}
+          onDelete={handleDeleteTask}
+        />
+      )}
+
+      {/* Trash View */}
+      {showTrash && (
+        <TrashView
+          onClose={() => setShowTrash(false)}
+          onTaskRestored={loadData}
         />
       )}
     </div>
