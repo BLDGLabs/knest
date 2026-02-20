@@ -14,8 +14,8 @@
     "load:sample": "node scripts/load-sample-data.js"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.982.0",
-    "@aws-sdk/lib-dynamodb": "^3.982.0",
+    "@aws-sdk/client-dynamodb": "^3.994.0",
+    "@aws-sdk/lib-dynamodb": "^3.994.0",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.564.0",
     "react": "^19.2.0",
