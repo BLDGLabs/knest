@@ -32,6 +32,7 @@ const SOURCE_ICONS = {
 
 const TaskTimelineView = ({ tasks, onTaskClick }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('all');
+  const [selectedSource, setSelectedSource] = useState('all');
   const [showDone, setShowDone] = useState(false);
 
   // Get unique assignees (optionally excluding Done tasks)
@@ -39,6 +40,13 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
     const activeTasks = showDone ? tasks : tasks.filter(t => t.column !== 'Done');
     const uniqueAssignees = [...new Set(activeTasks.map(t => t.assignedTo).filter(Boolean))];
     return uniqueAssignees.sort();
+  }, [tasks, showDone]);
+
+  // Get unique sources
+  const sources = useMemo(() => {
+    const activeTasks = showDone ? tasks : tasks.filter(t => t.column !== 'Done');
+    const uniqueSources = [...new Set(activeTasks.map(t => t.source).filter(Boolean))];
+    return uniqueSources.sort();
   }, [tasks, showDone]);
 
   // Filter and sort tasks
@@ -55,9 +63,14 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
       }
     }
 
+    // Filter by source
+    if (selectedSource !== 'all') {
+      filtered = filtered.filter(task => task.source === selectedSource);
+    }
+
     // Sort by createdAt descending (newest first)
     return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [tasks, selectedAssignee, showDone]);
+  }, [tasks, selectedAssignee, selectedSource, showDone]);
 
   // Get assignee initials for avatar fallback
   const getInitials = (name) => {
@@ -197,6 +210,34 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
             </button>
           ))}
         </div>
+
+        {/* Source filter */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 mt-2">
+          <button
+            onClick={() => setSelectedSource('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              selectedSource === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
+            }`}
+          >
+            All Sources
+          </button>
+          {sources.map(source => (
+            <button
+              key={source}
+              onClick={() => setSelectedSource(source)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
+                selectedSource === source
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-dark-hover text-gray-400 hover:bg-dark-border'
+              }`}
+            >
+              <span>{SOURCE_ICONS[source] || '❓'}</span>
+              {source.charAt(0).toUpperCase() + source.slice(1)} ({(showDone ? tasks : tasks.filter(t => t.column !== 'Done')).filter(t => t.source === source).length})
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Timeline list */}
@@ -257,8 +298,8 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                       {task.title}
                     </span>
                     {task.source && SOURCE_ICONS[task.source] && (
-                      <span className="text-xs opacity-60 flex-shrink-0" title={`Source: ${task.source}`}>
-                        {SOURCE_ICONS[task.source]}
+                      <span className="text-xs opacity-60 flex-shrink-0 flex items-center gap-1" title={`Source: ${task.source}`}>
+                        {SOURCE_ICONS[task.source]} {task.source.charAt(0).toUpperCase() + task.source.slice(1)}
                       </span>
                     )}
                   </div>

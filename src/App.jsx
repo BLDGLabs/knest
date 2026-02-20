@@ -8,7 +8,6 @@ import TaskModal from './components/TaskModal';
 import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
-import MitiStatusWidget from './components/MitiStatusWidget';
 import TaskTimelineView from './components/TaskTimelineView';
 import * as db from './services/dynamodb';
 import './App.css';
@@ -685,10 +684,6 @@ function App() {
                 </button>
               </div>
               
-              {/* Miti Status Widget */}
-              <div className="hidden sm:block">
-                <MitiStatusWidget />
-              </div>
               <button
                 onClick={() => {
                   setEditingTask(null);
