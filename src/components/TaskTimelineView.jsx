@@ -1,5 +1,27 @@
 import { useState, useMemo } from 'react';
 
+// Avatar images - stored in public/avatars/
+const ASSIGNEE_AVATARS = {
+  'Miti': '/avatars/miti.png',
+  'miti': '/avatars/miti.png',
+  'Jason': '/avatars/jason.png',
+  'jason': '/avatars/jason.png',
+};
+
+const ASSIGNEE_INITIALS = {
+  'Miti': 'M',
+  'miti': 'M',
+  'Jason': 'J',
+  'jason': 'J',
+};
+
+const ASSIGNEE_COLORS = {
+  'Miti': 'bg-purple-500/20 border-purple-500/40',
+  'miti': 'bg-purple-500/20 border-purple-500/40',
+  'Jason': 'bg-blue-500/20 border-blue-500/40',
+  'jason': 'bg-blue-500/20 border-blue-500/40',
+};
+
 const TaskTimelineView = ({ tasks, onTaskClick }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('all');
 
@@ -26,9 +48,10 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
     return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [tasks, selectedAssignee]);
 
-  // Get assignee initials for avatar
+  // Get assignee initials for avatar fallback
   const getInitials = (name) => {
     if (!name) return '?';
+    if (ASSIGNEE_INITIALS[name]) return ASSIGNEE_INITIALS[name];
     const parts = name.split(' ');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -123,10 +146,29 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
               }`}
             >
               <div 
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: getAssigneeColor(assignee) }}
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold border overflow-hidden ${
+                  ASSIGNEE_COLORS[assignee] || 'bg-gray-500/20 border-gray-500/40'
+                }`}
+                style={{ 
+                  backgroundColor: assignee && !ASSIGNEE_COLORS[assignee] ? getAssigneeColor(assignee) : undefined 
+                }}
               >
-                {getInitials(assignee)}
+                {ASSIGNEE_AVATARS[assignee] ? (
+                  <img 
+                    src={ASSIGNEE_AVATARS[assignee]} 
+                    alt={assignee}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <span 
+                  className={`${ASSIGNEE_AVATARS[assignee] ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}
+                >
+                  {getInitials(assignee)}
+                </span>
               </div>
               {assignee} ({tasks.filter(t => t.assignedTo === assignee).length})
             </button>
@@ -160,11 +202,28 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                 >
                   {/* Assignee avatar */}
                   <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-lg"
-                    style={{ backgroundColor: color }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-lg border-2 overflow-hidden ${
+                      ASSIGNEE_COLORS[task.assignedTo] || 'bg-gray-500/20 border-gray-500/40'
+                    }`}
+                    style={{ backgroundColor: task.assignedTo && !ASSIGNEE_COLORS[task.assignedTo] ? color : undefined }}
                     title={assignee}
                   >
-                    {getInitials(task.assignedTo)}
+                    {ASSIGNEE_AVATARS[task.assignedTo] ? (
+                      <img 
+                        src={ASSIGNEE_AVATARS[task.assignedTo]} 
+                        alt={task.assignedTo}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <span 
+                      className={`${ASSIGNEE_AVATARS[task.assignedTo] ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}
+                    >
+                      {getInitials(task.assignedTo)}
+                    </span>
                   </div>
 
                   {/* Task title */}
