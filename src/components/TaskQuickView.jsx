@@ -22,6 +22,22 @@ const ASSIGNEE_AVATARS = {
   'jason': '/avatars/jason.png',
 };
 
+const SOURCE_ICONS = {
+  'manual': '✏️',
+  'slack': '💬',
+  'jira': '🎫',
+  'github': '🐙',
+  'email': '📧',
+};
+
+const SOURCE_LABELS = {
+  'manual': 'Manual',
+  'slack': 'Slack',
+  'jira': 'Jira',
+  'github': 'GitHub',
+  'email': 'Email',
+};
+
 const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit }) => {
   // Close on Escape key
   useEffect(() => {
@@ -140,6 +156,19 @@ const TaskQuickView = ({ task, epic, allTasks, onClose, onEdit }) => {
               <p className="text-gray-500 text-sm italic">Unassigned</p>
             )}
           </div>
+
+          {/* Source */}
+          {task.source && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Source
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{SOURCE_ICONS[task.source]}</span>
+                <span className="text-white font-medium">{SOURCE_LABELS[task.source]}</span>
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           {task.tags && task.tags.length > 0 && (

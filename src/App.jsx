@@ -52,6 +52,7 @@ const SAMPLE_TASKS = [
     dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
+    source: 'manual',
   },
   {
     id: 2,
@@ -64,6 +65,7 @@ const SAMPLE_TASKS = [
     dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
+    source: 'github',
   },
   {
     id: 3,
@@ -76,6 +78,7 @@ const SAMPLE_TASKS = [
     dependsOn: [],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 1800000).toISOString(),
+    source: 'jira',
   },
   {
     id: 4,
@@ -88,6 +91,7 @@ const SAMPLE_TASKS = [
     dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    source: 'slack',
   },
   {
     id: 5,
@@ -100,6 +104,7 @@ const SAMPLE_TASKS = [
     dependsOn: [6],
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
+    source: 'manual',
   },
   {
     id: 6,
@@ -112,6 +117,7 @@ const SAMPLE_TASKS = [
     dependsOn: [],
     createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+    source: 'jira',
   },
   {
     id: 7,
@@ -124,6 +130,7 @@ const SAMPLE_TASKS = [
     dependsOn: [4],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 900000).toISOString(),
+    source: 'slack',
   },
 ];
 

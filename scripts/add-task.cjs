@@ -45,6 +45,7 @@ async function createTask(task) {
     tags: task.tags || [],
     priority: task.priority || 'Medium',
     dueDate: task.dueDate || null,
+    source: task.source || 'manual',
     createdAt: task.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

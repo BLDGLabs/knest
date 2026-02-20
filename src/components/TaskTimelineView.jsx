@@ -22,6 +22,14 @@ const ASSIGNEE_COLORS = {
   'jason': 'bg-blue-500/20 border-blue-500/40',
 };
 
+const SOURCE_ICONS = {
+  'manual': '✏️',
+  'slack': '💬',
+  'jira': '🎫',
+  'github': '🐙',
+  'email': '📧',
+};
+
 const TaskTimelineView = ({ tasks, onTaskClick }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('all');
   const [showDone, setShowDone] = useState(false);
@@ -242,12 +250,17 @@ const TaskTimelineView = ({ tasks, onTaskClick }) => {
                   </div>
 
                   {/* Task title */}
-                  <div className="flex-1 min-w-0">
-                    <span className={`text-base font-medium block truncate group-hover:text-blue-400 transition-colors ${
+                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <span className={`text-base font-medium truncate group-hover:text-blue-400 transition-colors ${
                       task.column === 'Done' ? 'line-through text-gray-500' : 'text-white'
                     }`}>
                       {task.title}
                     </span>
+                    {task.source && SOURCE_ICONS[task.source] && (
+                      <span className="text-xs opacity-60 flex-shrink-0" title={`Source: ${task.source}`}>
+                        {SOURCE_ICONS[task.source]}
+                      </span>
+                    )}
                   </div>
 
                   {/* Date + status badge */}

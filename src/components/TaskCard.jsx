@@ -32,6 +32,14 @@ const ASSIGNEE_INITIALS = {
   'jason': 'J',
 };
 
+const SOURCE_ICONS = {
+  'manual': '✏️',
+  'slack': '💬',
+  'jira': '🎫',
+  'github': '🐙',
+  'email': '📧',
+};
+
 const TaskCard = ({ task, onEdit, onDelete, onComplete, onQuickView, isDragging, epic, isBlocked, blockingTasks }) => {
   const {
     attributes,
@@ -102,6 +110,11 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, onQuickView, isDragging,
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
+            {task.source && SOURCE_ICONS[task.source] && (
+              <span className="text-sm opacity-60" title={`Source: ${task.source}`}>
+                {SOURCE_ICONS[task.source]}
+              </span>
+            )}
             {task.assignedTo && (
               <div 
                 className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold border-2 overflow-hidden flex-shrink-0 ${ASSIGNEE_COLORS[task.assignedTo] || 'bg-gray-500/20 text-gray-400 border-gray-500/40'}`}
